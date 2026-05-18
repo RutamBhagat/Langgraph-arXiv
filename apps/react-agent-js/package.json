@@ -16,16 +16,18 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@skyclad_langgraph/env": "workspace:*",
     "@langchain/core": "^1.1.8",
     "@langchain/google-genai": "^2.1.30",
     "@langchain/langgraph": "^1.3.0",
+    "@skyclad_langgraph/env": "workspace:*",
     "langchain": "^1.2.3",
+    "nerdamer-prime": "^1.4.0",
     "zod": "^4.2.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.2",
+    "@langchain/langgraph-cli": "^1.2.1",
     "@tsconfig/recommended": "^1.0.13",
     "@types/node": "^22.0.0",
     "@typescript-eslint/eslint-plugin": "^8.50.1",
@@ -34,7 +36,6 @@
     "eslint": "^9.39.2",
     "globals": "^16.5.0",
     "jiti": "^2.6.1",
-    "@langchain/langgraph-cli": "^1.2.1",
     "tsx": "^4.19.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.50.1"
