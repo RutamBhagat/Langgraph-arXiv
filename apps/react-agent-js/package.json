@@ -11,7 +11,7 @@
     "build": "tsc",
     "check-types": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "dev": "langgraph dev",
+    "dev": "langgraphjs dev",
     "start": "tsx src/index.ts",
     "lint": "eslint src"
   },
@@ -19,6 +19,7 @@
     "@skyclad_langgraph/env": "workspace:*",
     "@langchain/core": "^1.1.8",
     "@langchain/google-genai": "^2.1.30",
+    "@langchain/langgraph": "^1.3.0",
     "langchain": "^1.2.3",
     "zod": "^4.2.1"
   },

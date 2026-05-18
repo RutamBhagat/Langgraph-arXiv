@@ -241,6 +241,9 @@ importers:
       '@langchain/google-genai':
         specifier: ^2.1.30
         version: 2.1.30(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))
+      '@langchain/langgraph':
+        specifier: ^1.3.0
+        version: 1.3.0(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(ws@8.20.1)(zod@4.4.3)
       '@skyclad_langgraph/env':
         specifier: workspace:*
         version: link:../../packages/env
