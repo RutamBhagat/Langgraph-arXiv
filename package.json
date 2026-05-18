@@ -1,0 +1,35 @@
+{
+  "name": "skyclad_langgraph",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check-types": "turbo check-types",
+    "dev:server": "turbo -F server dev",
+    "db:push": "turbo -F @skyclad_langgraph/db db:push",
+    "db:studio": "turbo -F @skyclad_langgraph/db db:studio",
+    "db:generate": "turbo -F @skyclad_langgraph/db db:generate",
+    "db:migrate": "turbo -F @skyclad_langgraph/db db:migrate",
+    "db:start": "turbo -F @skyclad_langgraph/db db:start",
+    "db:watch": "turbo -F @skyclad_langgraph/db db:watch",
+    "db:stop": "turbo -F @skyclad_langgraph/db db:stop",
+    "db:down": "turbo -F @skyclad_langgraph/db db:down"
+  },
+  "dependencies": {
+    "@skyclad_langgraph/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@skyclad_langgraph/config": "workspace:*",
+    "@types/node": "catalog:",
+    "turbo": "^2.8.12",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@10.28.2"
+}
