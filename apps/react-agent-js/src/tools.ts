@@ -7,6 +7,9 @@
  */
 
 import { tool } from "langchain";
+import { ArxivRetriever } from "@langchain/community/retrievers/arxiv";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import nerdamer from "nerdamer-prime";
 import { z } from "zod";
 
@@ -82,8 +85,52 @@ export const searchKnowledge = tool(
   },
 );
 
+export const downloadArxivPaper = tool(
+  async ({ arxivId }) => {
+    try {
+      const retriever = new ArxivRetriever({
+        getFullDocuments: true,
+        maxSearchResults: 1,
+      });
+      const documents = await retriever.invoke(arxivId);
+
+      if (documents.length === 0) {
+        return `No arXiv paper found for id: ${arxivId}`;
+      }
+
+      const outputDir = path.resolve(process.cwd(), "downloads", "arxiv");
+      await mkdir(outputDir, { recursive: true });
+
+      const normalizedId = arxivId.trim();
+      const safeFileId = normalizedId.replaceAll("/", "_");
+      const filePath = path.join(outputDir, `${safeFileId}.json`);
+      const payload = documents.map((doc) => ({
+        pageContent: doc.pageContent,
+        metadata: doc.metadata,
+      }));
+      await writeFile(filePath, JSON.stringify(payload, null, 2), "utf8");
+
+      return `Saved retriever output for ${normalizedId} to ${filePath}`;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return `Error saving arXiv retriever output: ${message}`;
+    }
+  },
+  {
+    name: "download_arxiv_paper",
+    description:
+      "Fetch an arXiv paper by ID using LangChain's arXiv retriever and save the retriever output locally.",
+    schema: z.object({
+      arxivId: z
+        .string()
+        .min(1)
+        .describe("The arXiv ID, e.g. '1706.03762' or '2401.12345'"),
+    }),
+  },
+);
+
 /**
  * All tools available to the agent.
  * Add or remove tools here to customize your agent's capabilities.
  */
-export const TOOLS = [calculator, searchKnowledge];
+export const TOOLS = [calculator, searchKnowledge, downloadArxivPaper];

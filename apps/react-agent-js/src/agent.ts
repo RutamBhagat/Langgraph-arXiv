@@ -37,7 +37,7 @@ if (!env.GOOGLE_API_KEY) {
  */
 export const agent = createAgent({
   // Use explicit provider:model format to avoid provider inference ambiguity.
-  model: "google-genai:gemini-2.5-flash",
+  model: "google-genai:gemini-flash-lite-latest",
 
   // Tools available to the agent
   tools: TOOLS,
@@ -48,7 +48,7 @@ export const agent = createAgent({
   // Optional: Add middleware for advanced customization
   // middleware: [
   //   summarizationMiddleware({
-  //     model: "google-genai:gemini-2.5-flash",
+  //     model: "google-genai:gemini-flash-lite-latest",
   //     trigger: { tokens: 4000 },
   //   }),
   //   humanInTheLoopMiddleware({
