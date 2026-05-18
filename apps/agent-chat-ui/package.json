@@ -20,6 +20,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@skyclad_langgraph/env": "workspace:*",
     "@langchain/core": "^1.1.44",
     "@langchain/langgraph": "^1.2.9",
     "@langchain/langgraph-sdk": "^1.8.10",

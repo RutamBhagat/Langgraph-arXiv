@@ -12,6 +12,11 @@
 import { createAgent } from "langchain";
 import { TOOLS } from "./tools.js";
 import { SYSTEM_PROMPT } from "./prompts.js";
+import { env } from "@skyclad_langgraph/env/server";
+
+if (!env.GOOGLE_API_KEY) {
+  throw new Error("Missing GOOGLE_API_KEY");
+}
 
 /**
  * The main agent instance.
@@ -32,8 +37,8 @@ import { SYSTEM_PROMPT } from "./prompts.js";
  */
 export const agent = createAgent({
   // The model to use - supports "provider:model" format
-  // Uses ANTHROPIC_API_KEY or OPENAI_API_KEY from environment
-  model: "anthropic:claude-haiku-4-5",
+  // Uses GOOGLE_API_KEY from environment
+  model: "google_genai:gemini-2.5-flash",
 
   // Tools available to the agent
   tools: TOOLS,
@@ -44,7 +49,7 @@ export const agent = createAgent({
   // Optional: Add middleware for advanced customization
   // middleware: [
   //   summarizationMiddleware({
-  //     model: "anthropic:claude-haiku-4-5",
+  //     model: "google_genai:gemini-2.5-flash",
   //     trigger: { tokens: 4000 },
   //   }),
   //   humanInTheLoopMiddleware({

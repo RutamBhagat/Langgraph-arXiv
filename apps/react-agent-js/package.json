@@ -11,14 +11,14 @@
     "build": "tsc",
     "check-types": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "dev": "tsx watch src/index.ts",
+    "dev": "langgraph dev",
     "start": "tsx src/index.ts",
     "lint": "eslint src"
   },
   "dependencies": {
-    "@langchain/anthropic": "^1.3.3",
+    "@skyclad_langgraph/env": "workspace:*",
     "@langchain/core": "^1.1.8",
-    "@langchain/openai": "^1.0.0",
+    "@langchain/google-genai": "^2.1.30",
     "langchain": "^1.2.3",
     "zod": "^4.2.1"
   },
@@ -33,6 +33,7 @@
     "eslint": "^9.39.2",
     "globals": "^16.5.0",
     "jiti": "^2.6.1",
+    "@langchain/langgraph-cli": "^1.2.1",
     "tsx": "^4.19.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.50.1"

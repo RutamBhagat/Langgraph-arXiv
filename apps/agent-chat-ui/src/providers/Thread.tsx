@@ -11,6 +11,7 @@ import {
   Dispatch,
   SetStateAction,
 } from "react";
+import { env } from "@skyclad_langgraph/env/client";
 import { createClient } from "./client";
 
 interface ThreadContextType {
@@ -34,15 +35,18 @@ function getThreadSearchMetadata(
 }
 
 export function ThreadProvider({ children }: { children: ReactNode }) {
-  const envApiUrl: string | undefined = process.env.NEXT_PUBLIC_API_URL;
+  const envApiUrl: string | undefined =
+    env.NEXT_PUBLIC_API_URL ?? "http://localhost:2024";
   const envAssistantId: string | undefined =
-    process.env.NEXT_PUBLIC_ASSISTANT_ID;
-  const envAuthScheme: string | undefined = process.env.NEXT_PUBLIC_AUTH_SCHEME;
+    env.NEXT_PUBLIC_ASSISTANT_ID ?? "agent";
+  const envAuthScheme: string | undefined = env.NEXT_PUBLIC_AUTH_SCHEME;
 
   const [apiUrl] = useQueryState("apiUrl", {
-    defaultValue: envApiUrl || "",
+    defaultValue: envApiUrl,
   });
-  const [assistantId] = useQueryState("assistantId");
+  const [assistantId] = useQueryState("assistantId", {
+    defaultValue: envAssistantId,
+  });
   const [authScheme] = useQueryState("authScheme", {
     defaultValue: envAuthScheme || "",
   });

@@ -25,6 +25,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { getApiKey } from "@/lib/api-key";
 import { useThreads } from "./Thread";
 import { toast } from "sonner";
+import { env } from "@skyclad_langgraph/env/client";
 
 export type StateType = { messages: Message[]; ui?: UIMessage[] };
 
@@ -144,10 +145,9 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   // Get environment variables
-  const envApiUrl: string | undefined = process.env.NEXT_PUBLIC_API_URL;
-  const envAssistantId: string | undefined =
-    process.env.NEXT_PUBLIC_ASSISTANT_ID;
-  const envAuthScheme: string | undefined = process.env.NEXT_PUBLIC_AUTH_SCHEME;
+  const envApiUrl: string | undefined = env.NEXT_PUBLIC_API_URL;
+  const envAssistantId: string | undefined = env.NEXT_PUBLIC_ASSISTANT_ID;
+  const envAuthScheme: string | undefined = env.NEXT_PUBLIC_AUTH_SCHEME;
 
   // Use URL params with env var fallbacks
   const [apiUrl, setApiUrl] = useQueryState("apiUrl", {
