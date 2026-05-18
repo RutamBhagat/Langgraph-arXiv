@@ -10,7 +10,7 @@
  */
 
 import { createAgent } from "langchain";
-import { TOOLS } from "./tools.js";
+import { TOOLS } from "./tools/index.js";
 import { SYSTEM_PROMPT } from "./prompts.js";
 import { env } from "@skyclad_langgraph/env/server";
 

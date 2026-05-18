@@ -2,7 +2,7 @@ name: skyclad_langgraph
 
 services:
   postgres:
-    image: postgres
+    image: pgvector/pgvector:pg17
     container_name: skyclad_langgraph-postgres
     environment:
       POSTGRES_DB: skyclad_langgraph
