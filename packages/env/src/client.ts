@@ -6,7 +6,6 @@ export const env = createEnv({
   client: {
     NEXT_PUBLIC_API_URL: z.url().optional(),
     NEXT_PUBLIC_ASSISTANT_ID: z.string().min(1).optional(),
-    NEXT_PUBLIC_AUTH_SCHEME: z.string().min(1).optional(),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

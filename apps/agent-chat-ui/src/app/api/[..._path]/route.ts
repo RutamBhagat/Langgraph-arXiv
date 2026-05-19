@@ -7,6 +7,5 @@ import { env } from "@skyclad_langgraph/env/server";
 export const { GET, POST, PUT, PATCH, DELETE, OPTIONS, runtime } =
   initApiPassthrough({
     apiUrl: env.LANGGRAPH_API_URL,
-    apiKey: env.LANGSMITH_API_KEY,
     runtime: "edge", // default
   });

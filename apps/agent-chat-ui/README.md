@@ -44,8 +44,6 @@ Once the app is running (or if using the deployed site), you'll be prompted to e
 
 - **Deployment URL**: The URL of the LangGraph server you want to chat with. This can be a production or development URL.
 - **Assistant/Graph ID**: The name of the graph, or ID of the assistant to use when fetching, and submitting runs via the chat interface.
-- **LangSmith API Key**: (only required for connecting to deployed LangGraph servers) Your LangSmith API key to use when authenticating requests sent to LangGraph servers.
-- **Built with Agent Builder**: Toggle this on for Agent Builder deployments. This automatically sets the auth scheme to `langsmith-api-key`.
 
 After entering these values, click `Continue`. You'll then be redirected to a chat interface where you can start chatting with your LangGraph server.
 
@@ -56,11 +54,7 @@ You can bypass the initial setup form by setting the following environment varia
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:2024
 NEXT_PUBLIC_ASSISTANT_ID=agent
-NEXT_PUBLIC_AUTH_SCHEME=
 ```
-
-> [!NOTE]
-> If you are connecting to a LangSmith Agent Builder deployment, set `NEXT_PUBLIC_AUTH_SCHEME=langsmith-api-key`.
 
 > [!TIP]
 > If you want to connect to a production LangGraph server, read the [Going to Production](#going-to-production) section.
@@ -191,7 +185,7 @@ export function Writer(props: {
 
 ## Going to Production
 
-Once you're ready to go to production, you'll need to update how you connect, and authenticate requests to your deployment. By default, the Agent Chat UI is setup for local development, and connects to your LangGraph server directly from the client. This is not possible if you want to go to production, because it requires every user to have their own LangSmith API key, and set the LangGraph configuration themselves.
+Once you're ready to go to production, you'll need to update how you connect to your deployment. By default, the Agent Chat UI is setup for local development, and connects to your LangGraph server directly from the client.
 
 ### Production Setup
 
@@ -209,8 +203,6 @@ NEXT_PUBLIC_ASSISTANT_ID="agent"
 LANGGRAPH_API_URL="https://my-agent.default.us.langgraph.app"
 # This should be the URL of your website + "/api". This is how you connect to the API proxy
 NEXT_PUBLIC_API_URL="https://my-website.com/api"
-# Your LangSmith API key which is injected into requests inside the API proxy
-LANGSMITH_API_KEY="lsv2_..."
 ```
 
 Let's cover what each of these environment variables does:
@@ -218,13 +210,12 @@ Let's cover what each of these environment variables does:
 - `NEXT_PUBLIC_ASSISTANT_ID`: The ID of the assistant you want to use when fetching, and submitting runs via the chat interface. This still needs the `NEXT_PUBLIC_` prefix, since it's not a secret, and we use it on the client when submitting requests.
 - `LANGGRAPH_API_URL`: The URL of your LangGraph server. This should be the production deployment URL.
 - `NEXT_PUBLIC_API_URL`: The URL of your website + `/api`. This is how you connect to the API proxy. For the [Agent Chat demo](https://agentchat.vercel.app), this would be set as `https://agentchat.vercel.app/api`. You should set this to whatever your production URL is.
-- `LANGSMITH_API_KEY`: Your LangSmith API key to use when authenticating requests sent to LangGraph servers. Once again, do _not_ prefix this with `NEXT_PUBLIC_` since it's a secret, and is only used on the server when the API proxy injects it into the request to your deployed LangGraph server.
 
 For in depth documentation, consult the [LangGraph Next.js API Passthrough](https://www.npmjs.com/package/langgraph-nextjs-api-passthrough) docs.
 
 ### Advanced Setup - Custom Authentication
 
-Custom authentication in your LangGraph deployment is an advanced, and more robust way of authenticating requests to your LangGraph server. Using custom authentication, you can allow requests to be made from the client, without the need for a LangSmith API key. Additionally, you can specify custom access controls on requests.
+Custom authentication in your LangGraph deployment is an advanced, and more robust way of authenticating requests to your LangGraph server. Using custom authentication, you can allow requests to be made from the client while specifying custom access controls on requests.
 
 To set this up in your LangGraph deployment, please read the LangGraph custom authentication docs for [Python](https://langchain-ai.github.io/langgraph/tutorials/auth/getting_started/), and [TypeScript here](https://langchain-ai.github.io/langgraphjs/how-tos/auth/custom_auth/).
 
