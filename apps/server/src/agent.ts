@@ -10,13 +10,30 @@
  */
 
 import { createAgent } from "langchain";
+import { ChatOpenAI } from "@langchain/openai";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { TOOLS } from "./tools/index.js";
 import { SYSTEM_PROMPT } from "./prompts.js";
 import { env } from "@skyclad_langgraph/env/server";
 
-if (!env.GOOGLE_API_KEY) {
-  throw new Error("Missing GOOGLE_API_KEY");
-}
+const model = env.OPENAI_PROXY_BASE_URL
+  ? new ChatOpenAI({
+      model: "gpt-5.4-mini",
+      configuration: {
+        baseURL: env.OPENAI_PROXY_BASE_URL,
+      },
+      apiKey: env.OPENAI_API_KEY,
+    })
+  : env.GOOGLE_API_KEY
+    ? new ChatGoogleGenerativeAI({
+        model: "gemini-flash-lite-latest",
+        apiKey: env.GOOGLE_API_KEY,
+      })
+    : (() => {
+        throw new Error(
+          "No model provider configured. Set OPENAI_PROXY_BASE_URL (and optional OPENAI_API_KEY) or GOOGLE_API_KEY."
+        );
+      })();
 
 /**
  * The main agent instance.
@@ -36,8 +53,7 @@ if (!env.GOOGLE_API_KEY) {
  * ```
  */
 export const agent = createAgent({
-  // Use explicit provider:model format to avoid provider inference ambiguity.
-  model: "google-genai:gemini-flash-lite-latest",
+  model,
 
   // Tools available to the agent
   tools: TOOLS,

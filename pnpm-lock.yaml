@@ -46,6 +46,103 @@ importers:
         specifier: 'catalog:'
         version: 6.0.3
 
+  apps/server:
+    dependencies:
+      '@langchain/community':
+        specifier: ^1.0.0
+        version: 1.1.28(@browserbasehq/sdk@2.11.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.60.0)(deepmerge@4.3.1)(dotenv@17.4.2)(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(zod@4.4.3))(@ibm-cloud/watsonx-ai@1.7.12)(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(fast-xml-parser@5.8.0)(ibm-cloud-sdk-core@5.4.19)(ignore@7.0.5)(jsonwebtoken@9.0.3)(lodash@4.18.1)(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(pdf-parse@1.1.4)(pg@8.21.0)(playwright@1.60.0)(ws@8.20.1)
+      '@langchain/core':
+        specifier: ^1.1.8
+        version: 1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1)
+      '@langchain/google-genai':
+        specifier: ^2.1.30
+        version: 2.1.30(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))
+      '@langchain/langgraph':
+        specifier: ^1.3.0
+        version: 1.3.0(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(ws@8.20.1)(zod-to-json-schema@3.25.2(zod@4.4.3))(zod@4.4.3)
+      '@langchain/ollama':
+        specifier: ^1.0.2
+        version: 1.2.7(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))
+      '@langchain/openai':
+        specifier: ^1.4.6
+        version: 1.4.6(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(ws@8.20.1)
+      '@langchain/textsplitters':
+        specifier: ^1.0.0
+        version: 1.0.1(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))
+      '@skyclad_langgraph/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@skyclad_langgraph/env':
+        specifier: workspace:*
+        version: link:../../packages/env
+      fast-xml-parser:
+        specifier: ^5.3.0
+        version: 5.8.0
+      hono:
+        specifier: ^4.10.2
+        version: 4.12.19
+      langchain:
+        specifier: ^1.2.3
+        version: 1.4.0(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(ws@8.20.1)(zod-to-json-schema@3.25.2(zod@4.4.3))
+      langsmith:
+        specifier: ^0.7.1
+        version: 0.7.1(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1)
+      nerdamer-prime:
+        specifier: ^1.4.0
+        version: 1.4.0
+      openevals:
+        specifier: ^0.2.0
+        version: 0.2.0(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@5.9.3)(ws@8.20.1)(zod-to-json-schema@3.25.2(zod@4.4.3))(zod@4.4.3)
+      pdf-parse:
+        specifier: ^1.1.1
+        version: 1.1.4
+      zod:
+        specifier: ^4.2.1
+        version: 4.4.3
+    devDependencies:
+      '@eslint/eslintrc':
+        specifier: ^3.3.3
+        version: 3.3.5
+      '@eslint/js':
+        specifier: ^9.39.2
+        version: 9.39.4
+      '@langchain/langgraph-cli':
+        specifier: ^1.2.1
+        version: 1.2.1(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(@langchain/langgraph-checkpoint@1.0.2(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1)))(@langchain/langgraph-sdk@1.9.2(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(ws@8.20.1))(@langchain/langgraph@1.3.0(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(ws@8.20.1)(zod-to-json-schema@3.25.2(zod@4.4.3))(zod@4.4.3))(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(typescript@5.9.3)(ws@8.20.1)
+      '@tsconfig/recommended':
+        specifier: ^1.0.13
+        version: 1.0.13
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.19
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8.50.1
+        version: 8.59.3(@typescript-eslint/parser@8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
+      '@typescript-eslint/parser':
+        specifier: ^8.50.1
+        version: 8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.4.2
+      eslint:
+        specifier: ^9.39.2
+        version: 9.39.4(jiti@2.7.0)
+      globals:
+        specifier: ^16.5.0
+        version: 16.5.0
+      jiti:
+        specifier: ^2.6.1
+        version: 2.7.0
+      tsx:
+        specifier: ^4.19.0
+        version: 4.22.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      typescript-eslint:
+        specifier: ^8.50.1
+        version: 8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
+
   apps/web:
     dependencies:
       '@langchain/core':
@@ -198,7 +295,7 @@ importers:
         version: 9.39.4(jiti@2.7.0)
       eslint-config-next:
         specifier: 16.2.4
-        version: 16.2.4(@typescript-eslint/parser@8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.8.3))(eslint@9.39.4(jiti@2.7.0))(typescript@5.8.3)
+        version: 16.2.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.8.3)
       eslint-plugin-react-hooks:
         specifier: ^5.2.0
         version: 5.2.0(eslint@9.39.4(jiti@2.7.0))
@@ -232,100 +329,6 @@ importers:
       typescript-eslint:
         specifier: ^8.59.1
         version: 8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.8.3)
-
-  apps/server:
-    dependencies:
-      '@langchain/community':
-        specifier: ^1.0.0
-        version: 1.1.28(@browserbasehq/sdk@2.11.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.60.0)(deepmerge@4.3.1)(dotenv@17.4.2)(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(zod@4.4.3))(@ibm-cloud/watsonx-ai@1.7.12)(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(fast-xml-parser@5.8.0)(ibm-cloud-sdk-core@5.4.19)(ignore@7.0.5)(jsonwebtoken@9.0.3)(lodash@4.18.1)(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(pdf-parse@1.1.4)(pg@8.21.0)(playwright@1.60.0)(ws@8.20.1)
-      '@langchain/core':
-        specifier: ^1.1.8
-        version: 1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1)
-      '@langchain/google-genai':
-        specifier: ^2.1.30
-        version: 2.1.30(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))
-      '@langchain/langgraph':
-        specifier: ^1.3.0
-        version: 1.3.0(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(ws@8.20.1)(zod-to-json-schema@3.25.2(zod@4.4.3))(zod@4.4.3)
-      '@langchain/ollama':
-        specifier: ^1.0.2
-        version: 1.2.7(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))
-      '@langchain/textsplitters':
-        specifier: ^1.0.0
-        version: 1.0.1(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))
-      '@skyclad_langgraph/db':
-        specifier: workspace:*
-        version: link:../../packages/db
-      '@skyclad_langgraph/env':
-        specifier: workspace:*
-        version: link:../../packages/env
-      fast-xml-parser:
-        specifier: ^5.3.0
-        version: 5.8.0
-      hono:
-        specifier: ^4.10.2
-        version: 4.12.19
-      langchain:
-        specifier: ^1.2.3
-        version: 1.4.0(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(ws@8.20.1)(zod-to-json-schema@3.25.2(zod@4.4.3))
-      langsmith:
-        specifier: ^0.7.1
-        version: 0.7.1(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1)
-      nerdamer-prime:
-        specifier: ^1.4.0
-        version: 1.4.0
-      openevals:
-        specifier: ^0.2.0
-        version: 0.2.0(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@5.9.3)(ws@8.20.1)(zod-to-json-schema@3.25.2(zod@4.4.3))(zod@4.4.3)
-      pdf-parse:
-        specifier: ^1.1.1
-        version: 1.1.4
-      zod:
-        specifier: ^4.2.1
-        version: 4.4.3
-    devDependencies:
-      '@eslint/eslintrc':
-        specifier: ^3.3.3
-        version: 3.3.5
-      '@eslint/js':
-        specifier: ^9.39.2
-        version: 9.39.4
-      '@langchain/langgraph-cli':
-        specifier: ^1.2.1
-        version: 1.2.1(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(@langchain/langgraph-checkpoint@1.0.2(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1)))(@langchain/langgraph-sdk@1.9.2(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(ws@8.20.1))(@langchain/langgraph@1.3.0(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(ws@8.20.1)(zod-to-json-schema@3.25.2(zod@4.4.3))(zod@4.4.3))(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(typescript@5.9.3)(ws@8.20.1)
-      '@tsconfig/recommended':
-        specifier: ^1.0.13
-        version: 1.0.13
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.19.19
-      '@typescript-eslint/eslint-plugin':
-        specifier: ^8.50.1
-        version: 8.59.3(@typescript-eslint/parser@8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      '@typescript-eslint/parser':
-        specifier: ^8.50.1
-        version: 8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      dotenv:
-        specifier: ^17.2.3
-        version: 17.4.2
-      eslint:
-        specifier: ^9.39.2
-        version: 9.39.4(jiti@2.7.0)
-      globals:
-        specifier: ^16.5.0
-        version: 16.5.0
-      jiti:
-        specifier: ^2.6.1
-        version: 2.7.0
-      tsx:
-        specifier: ^4.19.0
-        version: 4.22.1
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      typescript-eslint:
-        specifier: ^8.50.1
-        version: 8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
 
   packages/config: {}
 
@@ -1694,6 +1697,12 @@ packages:
     engines: {node: '>=20'}
     peerDependencies:
       '@langchain/core': ^1.1.42
+
+  '@langchain/openai@1.4.6':
+    resolution: {integrity: sha512-R92/hW1aFlL9YNWLDEy1ePBnsn83kPOINNsVD+asjTJKB/00Dwf6s0VBpgZLRJiSWOW/RvbLJ/V4Djayh5boyQ==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@langchain/core': ^1.1.47
 
   '@langchain/protocol@0.0.15':
     resolution: {integrity: sha512-MllvbpMjqHevUm+v94M422mH7XKN+wGCvJRBVROTWBotEDOATYB4Ktk2UheYP859y9o2LlhtPek5t1T9eyfAbQ==}
@@ -6280,7 +6289,7 @@ snapshots:
       '@ibm-cloud/watsonx-ai': 1.7.12
       '@langchain/classic': 1.0.32(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1)
       '@langchain/core': 1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1)
-      '@langchain/openai': 1.4.5(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(ws@8.20.1)
+      '@langchain/openai': 1.4.6(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(ws@8.20.1)
       binary-extensions: 2.3.0
       flat: 5.0.2
       ibm-cloud-sdk-core: 5.4.19
@@ -6465,6 +6474,15 @@ snapshots:
       ollama: 0.6.3
 
   '@langchain/openai@1.4.5(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(ws@8.20.1)':
+    dependencies:
+      '@langchain/core': 1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1)
+      js-tiktoken: 1.0.21
+      openai: 6.38.0(ws@8.20.1)(zod@4.4.3)
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - ws
+
+  '@langchain/openai@1.4.6(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(ws@8.20.1)':
     dependencies:
       '@langchain/core': 1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1)
       js-tiktoken: 1.0.21
@@ -7981,13 +7999,13 @@ snapshots:
 
   escape-string-regexp@5.0.0: {}
 
-  eslint-config-next@16.2.4(@typescript-eslint/parser@8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.8.3))(eslint@9.39.4(jiti@2.7.0))(typescript@5.8.3):
+  eslint-config-next@16.2.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.8.3):
     dependencies:
       '@next/eslint-plugin-next': 16.2.4
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0))
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-react: 7.37.5(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-react-hooks: 7.1.1(eslint@9.39.4(jiti@2.7.0))
@@ -8009,7 +8027,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0)):
+  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.3
@@ -8020,22 +8038,21 @@ snapshots:
       tinyglobby: 0.2.16
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.8.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0)):
+  eslint-module-utils@2.12.1(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
-      '@typescript-eslint/parser': 8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.8.3)
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0)):
+  eslint-plugin-import@2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -8046,7 +8063,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.8.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
+      eslint-module-utils: 2.12.1(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
       hasown: 2.0.3
       is-core-module: 2.16.2
       is-glob: 4.0.3
@@ -8057,8 +8074,6 @@ snapshots:
       semver: 6.3.1
       string.prototype.trimend: 1.0.9
       tsconfig-paths: 3.15.0
-    optionalDependencies:
-      '@typescript-eslint/parser': 8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.8.3)
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
       - eslint-import-resolver-webpack
@@ -9593,7 +9608,7 @@ snapshots:
   openevals@0.2.0(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@5.9.3)(ws@8.20.1)(zod-to-json-schema@3.25.2(zod@4.4.3))(zod@4.4.3):
     dependencies:
       '@langchain/core': 1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1)
-      '@langchain/openai': 1.4.5(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(ws@8.20.1)
+      '@langchain/openai': 1.4.6(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(ws@8.20.1)
       langchain: 1.4.0(@langchain/core@1.1.46(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1))(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(ws@8.20.1)(zod-to-json-schema@3.25.2(zod@4.4.3))
       langsmith: 0.7.1(openai@6.38.0(ws@8.20.1)(zod@4.4.3))(ws@8.20.1)
       uuid: 11.1.1

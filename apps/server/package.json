@@ -22,6 +22,7 @@
     "@langchain/google-genai": "^2.1.30",
     "@langchain/langgraph": "^1.3.0",
     "@langchain/ollama": "^1.0.2",
+    "@langchain/openai": "^1.4.6",
     "@langchain/textsplitters": "^1.0.0",
     "@skyclad_langgraph/db": "workspace:*",
     "@skyclad_langgraph/env": "workspace:*",
