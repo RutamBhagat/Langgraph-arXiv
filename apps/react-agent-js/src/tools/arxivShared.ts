@@ -8,6 +8,7 @@ export const RRF_K = 60;
 
 export const embeddings = new OllamaEmbeddings({
   model: "qwen3-embedding:8b",
+  dimensions: 1536,
   baseUrl: "http://localhost:11434", // can be changed if deployed on server, currently this is heavy, better option is to get gemini paid plan for embeddings, free plan has rate limits
 });
 

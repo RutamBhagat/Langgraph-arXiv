@@ -5,6 +5,32 @@ import { tool } from "langchain";
 import { z } from "zod";
 import { documentSplitter, embeddings, parseDate } from "./arxivShared.js";
 
+// db ingestion null char edge case
+function removeNullBytes(text: string): string {
+  // eslint-disable-next-line no-control-regex
+  return text.replace(/\u0000/g, "");
+}
+
+// prevents bloated error logs
+function getSafeErrorMessage(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return "Unknown error";
+  }
+  const cleaned = error.message
+    .replace(/\nparams:\s[\s\S]*$/i, "")
+    .replace(/^Failed query:[\s\S]*$/i, "Database write failed");
+
+  const errorWithCause = error as { cause?: unknown };
+  if (
+    cleaned === "Database write failed" &&
+    errorWithCause.cause instanceof Error
+  ) {
+    return `Database write failed: ${errorWithCause.cause.message}`;
+  }
+
+  return cleaned;
+}
+
 export const downloadArxivPaper = tool(
   async ({ arxivId }) => {
     try {
@@ -45,10 +71,22 @@ export const downloadArxivPaper = tool(
         summary: string;
       };
 
-      const summaryEmbedding = await embeddings.embedQuery(metadata.summary);
+      const safeMetadata = {
+        title: removeNullBytes(metadata.title),
+        authors: metadata.authors.map((author) => removeNullBytes(author)),
+        published: metadata.published,
+        updated: metadata.updated,
+        url: removeNullBytes(metadata.url),
+        summary: removeNullBytes(metadata.summary),
+      };
+      const safePageContent = removeNullBytes(firstDocument.pageContent);
+
+      const summaryEmbedding = await embeddings.embedQuery(
+        safeMetadata.summary,
+      );
 
       const preparedDocuments = (
-        await documentSplitter.splitText(firstDocument.pageContent)
+        await documentSplitter.splitText(safePageContent)
       ).map((pageContent, chunkIndex) => ({
         chunkIndex,
         pageContent,
@@ -58,7 +96,9 @@ export const downloadArxivPaper = tool(
         preparedDocuments.length === 0
           ? []
           : await embeddings.embedDocuments(
-              preparedDocuments.map((documentChunk) => documentChunk.pageContent),
+              preparedDocuments.map(
+                (documentChunk) => documentChunk.pageContent,
+              ),
             );
 
       const insertedPaper = await db.transaction(async (tx) => {
@@ -66,12 +106,12 @@ export const downloadArxivPaper = tool(
           .insert(papers)
           .values({
             arxivId: arxivId,
-            title: metadata.title,
-            authors: metadata.authors,
-            publishedAt: parseDate(metadata.published),
-            updatedAt: parseDate(metadata.updated),
-            url: metadata.url,
-            summary: metadata.summary,
+            title: safeMetadata.title,
+            authors: safeMetadata.authors,
+            publishedAt: parseDate(safeMetadata.published),
+            updatedAt: parseDate(safeMetadata.updated),
+            url: safeMetadata.url,
+            summary: safeMetadata.summary,
             summaryEmbedding,
           })
           .returning({
@@ -115,7 +155,7 @@ export const downloadArxivPaper = tool(
         title: insertedPaper.title,
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
+      const message = getSafeErrorMessage(error);
       return `Error ingesting arXiv paper: ${message}`;
     }
   },
