@@ -19,9 +19,9 @@ npx create-agent-chat-app
 or
 
 ```bash
-git clone https://github.com/langchain-ai/agent-chat-ui.git
+git clone https://github.com/RutamBhagat/skyclad_langgraph.git
 
-cd agent-chat-ui
+cd skyclad_langgraph/apps/web
 ```
 
 Install dependencies:
