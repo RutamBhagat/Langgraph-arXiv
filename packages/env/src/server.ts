@@ -8,6 +8,7 @@ export const env = createEnv({
     CORS_ORIGIN: z.url(),
     LANGGRAPH_API_URL: z.url().default("http://localhost:2024"),
     GOOGLE_API_KEY: z.string().min(1).optional(),
+    EMBEDDINGS_MODEL: z.string().min(1).default("gemini-embedding-2"),
     OPENAI_PROXY_BASE_URL: z.url().optional(),
     OPENAI_API_KEY: z.string().min(1).optional(),
     LANGSMITH_API_KEY: z.string().min(1).optional(),

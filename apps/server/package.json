@@ -17,6 +17,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
+    "@google/genai": "^1.28.0",
     "@langchain/core": "^1.1.8",
     "@langchain/community": "^1.0.0",
     "@langchain/google-genai": "^2.1.30",
