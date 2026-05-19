@@ -13,7 +13,7 @@ export const embeddings = new OllamaEmbeddings({
 });
 
 export const documentSplitter = new RecursiveCharacterTextSplitter({
-  chunkSize: 800,
+  chunkSize: 4000,
   chunkOverlap: 100,
 });
 
