@@ -16,13 +16,15 @@ import { TOOLS } from "./tools/index.js";
 import { SYSTEM_PROMPT } from "./prompts.js";
 import { env } from "@skyclad_langgraph/env/server";
 
-const model = env.OPENAI_PROXY_BASE_URL
+export const model = env.OPENAI_PROXY_BASE_URL
   ? new ChatOpenAI({
       model: "gpt-5.4-mini",
       configuration: {
         baseURL: env.OPENAI_PROXY_BASE_URL,
       },
-      apiKey: env.OPENAI_API_KEY,
+      // OpenAI SDK requires an apiKey value even when a local OpenAI-compatible proxy
+      // handles auth via prior OAuth login and does not require a bearer key.
+      apiKey: env.OPENAI_API_KEY ?? "not-needed",
     })
   : env.GOOGLE_API_KEY
     ? new ChatGoogleGenerativeAI({

@@ -5,7 +5,7 @@ import { Client } from "langsmith";
 import { evaluate } from "langsmith/evaluation";
 import type { ExampleCreate } from "langsmith/schemas";
 import { createLLMAsJudge } from "openevals";
-import { agent } from "../agent.js";
+import { agent, model } from "../agent.js";
 
 const DATASET_NAME = "eval";
 const DATASET_PATH = fileURLToPath(
@@ -29,6 +29,9 @@ type EvalInputs = {
 const JUDGE_PROMPT = `You are grading an agent answer for a research-paper RAG assignment.
 
 Return true only when the response satisfies the expected behavior.
+You must output valid JSON with exactly these keys:
+- "score": boolean
+- "reasoning": string
 
 Expected behavior rules:
 - answer: The response must match the reference answer and grading notes.
@@ -47,7 +50,7 @@ Reference answer and grading notes:
 const assignmentJudge = createLLMAsJudge({
   prompt: JUDGE_PROMPT,
   feedbackKey: "assignment_score",
-  model: "google-genai:gemini-flash-lite-latest",
+  judge: model,
 });
 
 async function evaluateAssignment(params: {
@@ -68,26 +71,28 @@ const evalCases = JSON.parse(data) as EvalCase[];
 const client = new Client();
 const datasetExists = await client.hasDataset({ datasetName: DATASET_NAME });
 
-if (!datasetExists) {
-  const createdDataset = await client.createDataset(DATASET_NAME, {
-    description: "Hand-authored Skyclad agent evals for behavior scoring.",
-  });
-
-  const examples: ExampleCreate[] = evalCases.map((evalCase) => ({
-    dataset_id: createdDataset.id,
-    inputs: {
-      input_question: evalCase.input_question,
-    },
-    outputs: {
-      expected_behavior: evalCase.expected_behavior,
-      reference_answer: evalCase.reference_answer,
-      grading_notes: evalCase.grading_notes,
-    },
-    metadata: { id: evalCase.id },
-  }));
-
-  await client.createExamples(examples);
+if (datasetExists) {
+  await client.deleteDataset({ datasetName: DATASET_NAME });
 }
+
+const createdDataset = await client.createDataset(DATASET_NAME, {
+  description: "Hand-authored Skyclad agent evals for behavior scoring.",
+});
+
+const examples: ExampleCreate[] = evalCases.map((evalCase) => ({
+  dataset_id: createdDataset.id,
+  inputs: {
+    input_question: evalCase.input_question,
+  },
+  outputs: {
+    expected_behavior: evalCase.expected_behavior,
+    reference_answer: evalCase.reference_answer,
+    grading_notes: evalCase.grading_notes,
+  },
+  metadata: { id: evalCase.id },
+}));
+
+await client.createExamples(examples);
 
 async function runAgent(inputs: EvalInputs): Promise<{ answer: string }> {
   const result = await agent.invoke({
