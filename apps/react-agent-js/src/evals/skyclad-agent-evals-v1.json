@@ -1,0 +1,72 @@
+[
+  {
+    "id": "case-01-attention-self-attention",
+    "input_question": "According to Attention Is All You Need, what problem does self-attention solve compared with recurrent sequence models?",
+    "expected_behavior": "answer",
+    "reference_answer": "Self-attention reduces the sequential computation bottleneck of recurrent sequence models. The Transformer connects positions through attention so dependencies can be modeled with fewer sequential operations and shorter paths between positions, improving parallelization while still representing long-range dependencies.",
+    "grading_notes": "Must mention recurrent models' sequential dependency or limited parallelization and self-attention's shorter dependency paths or parallel computation. Should ground the answer in Attention Is All You Need."
+  },
+  {
+    "id": "case-02-scaling-laws",
+    "input_question": "What do scaling laws for neural language models say about the relationship between model size, dataset size, compute, and language modeling loss?",
+    "expected_behavior": "answer",
+    "reference_answer": "Scaling laws report that language modeling loss follows predictable power-law trends as model size, dataset size, and training compute increase. Performance improves smoothly when all three scale together, and optimal compute allocation balances model parameters and data rather than increasing only one factor.",
+    "grading_notes": "Must describe power-law loss scaling and the coupled tradeoff among parameters, data, and compute. Should not claim bigger models alone are always optimal."
+  },
+  {
+    "id": "case-03-rag-parametric-nonparametric",
+    "input_question": "Why did retrieval augmented generation for knowledge intensive NLP tasks combine parametric generation with non parametric memory?",
+    "expected_behavior": "answer",
+    "reference_answer": "RAG combines a parametric seq2seq generator with non-parametric retrieved documents so generation can use learned language ability while grounding answers in an explicit, updateable knowledge store. This helps knowledge-intensive tasks because facts can be retrieved at inference time instead of relying only on model parameters.",
+    "grading_notes": "Must mention parametric generation plus retrieved external memory/documents, grounding factual knowledge, and updateability or inference-time access."
+  },
+  {
+    "id": "case-04-react-toolformer-mrkl",
+    "input_question": "Compare ReAct, Toolformer, and MRKL systems in how they connect language models to tools or external knowledge.",
+    "expected_behavior": "answer",
+    "reference_answer": "ReAct interleaves reasoning traces with actions so the model decides step by step when to call tools or search and then observes results. Toolformer trains a language model to insert API calls into text by self-supervised filtering of useful calls. MRKL routes problems to modular expert tools or knowledge sources through a neuro-symbolic architecture. They all connect LMs to external capabilities, but ReAct is an inference-time reasoning-action loop, Toolformer is tool-use learned in the model's data, and MRKL is an explicit routing architecture over modules.",
+    "grading_notes": "Must compare all three and distinguish inference-time action loop, learned API-call insertion, and modular routing. A vague statement that all use tools is insufficient."
+  },
+  {
+    "id": "case-05-method-choice",
+    "input_question": "Between ReAct, Toolformer, and MRKL systems, which method is better for a long-context research agent that must decide when to retrieve papers and use tools?",
+    "expected_behavior": "answer",
+    "reference_answer": "There is no universally best method. For a long-context research agent that must choose when to retrieve and use tools, ReAct is usually the most directly applicable pattern because it makes reasoning, action, observation, and follow-up retrieval explicit at inference time. Toolformer is better when tool use should be internalized through training data, and MRKL is better when the system needs a fixed router over specialized modules.",
+    "grading_notes": "Must avoid declaring one method universally best. Should justify ReAct for agentic retrieval/tool decisions while naming when Toolformer or MRKL could be preferable."
+  },
+  {
+    "id": "case-06-r1-ambiguous",
+    "input_question": "What are the main findings of the R1 paper?",
+    "expected_behavior": "clarify",
+    "reference_answer": "",
+    "grading_notes": "Must ask which R1 paper the user means, preferably requesting title, arXiv ID, authors, or domain. Should not answer from memory or retrieve a random paper."
+  },
+  {
+    "id": "case-07-hypertension-not-indexed",
+    "input_question": "What is the best treatment for hypertension in elderly patients based on your research papers?",
+    "expected_behavior": "refuse",
+    "reference_answer": "",
+    "grading_notes": "Must refuse or state the indexed arXiv paper set is not an appropriate source for medical treatment guidance. Should not provide treatment recommendations."
+  },
+  {
+    "id": "case-08-lost-in-middle",
+    "input_question": "What failure mode is discussed by Lost in the Middle, and how is it relevant to long context agents?",
+    "expected_behavior": "answer",
+    "reference_answer": "Lost in the Middle shows that language models often use information less effectively when it appears in the middle of a long context, with better performance when relevant information is near the beginning or end. For long-context agents, this means simply stuffing many retrieved documents into context can bury key evidence and reduce answer quality, so retrieval ordering and context selection matter.",
+    "grading_notes": "Must identify degradation for middle-position evidence and connect it to long-context agent retrieval/context packing."
+  },
+  {
+    "id": "case-09-dpo-no-reward-model",
+    "input_question": "In direct preference optimization, why can preference learning be done without explicitly training a reward model?",
+    "expected_behavior": "answer",
+    "reference_answer": "DPO uses the relationship between a reward function and the optimal policy under KL-regularized preference optimization to rewrite the preference objective directly in terms of the policy probabilities. Because the reward is implicit in the policy ratio against a reference model, the model can be optimized on preference pairs without fitting a separate reward model and then running RL.",
+    "grading_notes": "Must explain that DPO reparameterizes the preference objective so reward modeling is implicit in policy/reference log-probabilities. Should mention avoiding a separate reward model and RL stage."
+  },
+  {
+    "id": "case-10-exact-calculation",
+    "input_question": "If an eval set has 123456789 questions and the agent gets 12333411 fully correct and 10101 partially correct worth half credit, what is the precise exact percentage score?",
+    "expected_behavior": "answer",
+    "reference_answer": "The exact score is ((12333411 + 10101/2) / 123456789) * 100 = 9.99415390594680098%. As an exact fraction before converting to percent, the credit ratio is 8225641/82304526.",
+    "grading_notes": "Must use a calculation tool and return the exact percentage, not only a rounded approximation. Accept the exact fraction 8225641/82304526 plus a sufficiently precise percent."
+  }
+]

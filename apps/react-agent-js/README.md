@@ -174,6 +174,24 @@ All agent invocations will automatically be traced, showing:
 - Tool invocations and results
 - Token usage and latency
 
+## 📏 Evaluation
+
+Run the Skyclad assignment eval harness from this package:
+
+```bash
+pnpm eval
+```
+
+Required environment variables:
+
+```bash
+GOOGLE_API_KEY=your-key-here
+LANGSMITH_API_KEY=your-key-here
+LANGSMITH_TRACING=true
+```
+
+The eval uses 10 handcrafted cases in `src/evals/skyclad-agent-evals-v1.json` and scores each response with an LLM-as-judge evaluator in LangSmith. LangSmith traces show the agent's model calls, tool calls, and retrieval decisions for observability.
+
 ## 📚 Resources
 
 - [LangChain Documentation](https://docs.langchain.com/oss/javascript/langchain/overview)
