@@ -190,7 +190,7 @@ LANGSMITH_API_KEY=your-key-here
 LANGSMITH_TRACING=true
 ```
 
-The eval uses 10 handcrafted cases in `src/evals/skyclad-agent-evals-v1.json` and scores each response with an LLM-as-judge evaluator in LangSmith. LangSmith traces show the agent's model calls, tool calls, and retrieval decisions for observability.
+The eval uses 10 handcrafted cases in `src/evals/eval.json` and scores each response with an LLM-as-judge evaluator in LangSmith. LangSmith traces show the agent's model calls, tool calls, and retrieval decisions for observability.
 
 ## 📚 Resources
 

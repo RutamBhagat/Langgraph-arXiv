@@ -7,9 +7,9 @@ import type { ExampleCreate } from "langsmith/schemas";
 import { createLLMAsJudge } from "openevals";
 import { agent } from "../agent.js";
 
-const DATASET_NAME = "skyclad-agent-evals-v1";
+const DATASET_NAME = "eval";
 const DATASET_PATH = fileURLToPath(
-  new URL("./skyclad-agent-evals-v1.json", import.meta.url)
+  new URL("./eval.json", import.meta.url),
 );
 
 type ExpectedBehavior = "answer" | "clarify" | "refuse";
@@ -42,13 +42,25 @@ Agent response:
 {outputs}
 
 Reference answer and grading notes:
-{referenceOutputs}`;
+{reference_outputs}`;
 
 const assignmentJudge = createLLMAsJudge({
   prompt: JUDGE_PROMPT,
   feedbackKey: "assignment_score",
   model: "google-genai:gemini-flash-lite-latest",
 });
+
+async function evaluateAssignment(params: {
+  inputs: Record<string, unknown>;
+  outputs: Record<string, unknown>;
+  referenceOutputs?: Record<string, unknown>;
+}) {
+  return assignmentJudge({
+    inputs: params.inputs,
+    outputs: params.outputs,
+    referenceOutputs: params.referenceOutputs,
+  });
+}
 
 const data = await readFile(DATASET_PATH, "utf8");
 const evalCases = JSON.parse(data) as EvalCase[];
@@ -89,7 +101,7 @@ async function runAgent(inputs: EvalInputs): Promise<{ answer: string }> {
 
 await evaluate(runAgent, {
   data: DATASET_NAME,
-  evaluators: [assignmentJudge],
+  evaluators: [evaluateAssignment],
   experimentPrefix: "skyclad-agent",
   maxConcurrency: 1,
   client,
