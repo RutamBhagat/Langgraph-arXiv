@@ -37,11 +37,10 @@ export const downloadArxivPaper = tool(
       const existingPaper = await db
         .select({
           paperId: papers.id,
-          arxivId: papers.arxivId,
           title: papers.title,
         })
         .from(papers)
-        .where(eq(papers.arxivId, arxivId))
+        .where(eq(papers.id, arxivId))
         .limit(1);
 
       if (existingPaper.length > 0) {
@@ -67,7 +66,6 @@ export const downloadArxivPaper = tool(
         authors: string[];
         published: string;
         updated: string;
-        url: string;
         summary: string;
       };
 
@@ -76,7 +74,6 @@ export const downloadArxivPaper = tool(
         authors: metadata.authors.map((author) => removeNullBytes(author)),
         published: metadata.published,
         updated: metadata.updated,
-        url: removeNullBytes(metadata.url),
         summary: removeNullBytes(metadata.summary),
       };
       const safePageContent = removeNullBytes(firstDocument.pageContent);
@@ -105,18 +102,16 @@ export const downloadArxivPaper = tool(
         const insertedPapers = await tx
           .insert(papers)
           .values({
-            arxivId: arxivId,
+            id: arxivId,
             title: safeMetadata.title,
             authors: safeMetadata.authors,
             publishedAt: parseDate(safeMetadata.published),
             updatedAt: parseDate(safeMetadata.updated),
-            url: safeMetadata.url,
             summary: safeMetadata.summary,
             summaryEmbedding,
           })
           .returning({
             id: papers.id,
-            arxivId: papers.arxivId,
             title: papers.title,
           });
 
@@ -151,7 +146,6 @@ export const downloadArxivPaper = tool(
       return {
         status: "ingested",
         paperId: insertedPaper.id,
-        arxivId: insertedPaper.arxivId,
         title: insertedPaper.title,
       };
     } catch (error) {

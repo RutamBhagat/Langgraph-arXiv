@@ -12,7 +12,6 @@ export const resolveArxivPaper = tool(
       const candidates = await db
         .select({
           paperId: papers.id,
-          arxivId: papers.arxivId,
           title: papers.title,
           similarity,
         })

@@ -98,7 +98,8 @@ export const queryArxivPaperDocs = tool(
       "Query only the specified ingested paper by paperId and return top document chunks using hybrid semantic + lexical retrieval.",
     schema: z.object({
       paperId: z
-        .uuid()
+        .string()
+        .min(1)
         .describe("Resolved paper ID returned from resolve_arxiv_paper"),
       question: z
         .string()
