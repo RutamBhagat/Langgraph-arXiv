@@ -1,4 +1,11 @@
-import { db, eq, sql, cosineDistance, desc } from "@skyclad_langgraph/db";
+import {
+  db,
+  eq,
+  sql,
+  cosineDistance,
+  desc,
+  inArray,
+} from "@skyclad_langgraph/db";
 import { paperDocuments } from "@skyclad_langgraph/db/schema/index";
 import { tool } from "langchain";
 import { z } from "zod";
@@ -11,7 +18,7 @@ import {
 } from "./arxivShared.js";
 
 export const queryArxivPaperDocs = tool(
-  async ({ paperId, question }) => {
+  async ({ paperId, question, lexicalQuery }) => {
     try {
       const questionEmbedding = await embeddings.embedQuery(question);
 
@@ -26,17 +33,20 @@ export const queryArxivPaperDocs = tool(
         .orderBy((table) => desc(table.score))
         .limit(DOCUMENT_VECTOR_LIMIT);
 
-      const lexicalRows = await db
-        .select({
-          documentId: paperDocuments.id,
-          score: sql<number>`ts_rank_cd(${paperDocuments.pageContentSearch}, plainto_tsquery('english', ${question}))`,
-        })
-        .from(paperDocuments)
-        .where(
-          sql`${paperDocuments.paperId} = ${paperId} AND ${paperDocuments.pageContentSearch} @@ plainto_tsquery('english', ${question})`,
-        )
-        .orderBy((table) => desc(table.score))
-        .limit(LEXICAL_LIMIT);
+      const lexicalRows =
+        lexicalQuery.length === 0
+          ? []
+          : await db
+              .select({
+                documentId: paperDocuments.id,
+                score: sql<number>`ts_rank_cd(${paperDocuments.pageContentSearch}, websearch_to_tsquery('english', ${lexicalQuery}))`,
+              })
+              .from(paperDocuments)
+              .where(
+                sql`${paperDocuments.paperId} = ${paperId} AND ${paperDocuments.pageContentSearch} @@ websearch_to_tsquery('english', ${lexicalQuery})`,
+              )
+              .orderBy((table) => desc(table.score))
+              .limit(LEXICAL_LIMIT);
 
       const fusedScoresByDocumentId = new Map<string, number>();
       for (const [rank, row] of semanticRows.entries()) {
@@ -71,7 +81,7 @@ export const queryArxivPaperDocs = tool(
           pageContent: paperDocuments.pageContent,
         })
         .from(paperDocuments)
-        .where(sql`${paperDocuments.id} = ANY(${rankedDocumentIds})`);
+        .where(inArray(paperDocuments.id, rankedDocumentIds));
 
       const documentById = new Map(
         documents.map((documentChunk) => [documentChunk.id, documentChunk]),
@@ -105,6 +115,11 @@ export const queryArxivPaperDocs = tool(
         .string()
         .min(1)
         .describe("Question to answer from the resolved paper"),
+      lexicalQuery: z
+        .string()
+        .describe(
+          "Agent-authored PostgreSQL websearch lexical query for exact recall. Pass an empty string when no useful exact terms are known.",
+        ),
     }),
   },
 );
