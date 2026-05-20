@@ -17,13 +17,13 @@ export const resolveArxivPaper = tool(
         })
         .from(papers)
         .orderBy((table) => desc(table.similarity))
-        .limit(1);
+        .limit(3);
 
       if (candidates.length === 0) {
         return { status: "not_found" };
       }
 
-      return { status: "resolved", ...candidates[0] };
+      return { status: "resolved", candidates };
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       return `Error resolving arXiv paper: ${message}`;
@@ -32,7 +32,7 @@ export const resolveArxivPaper = tool(
   {
     name: "resolve_arxiv_paper",
     description:
-      "Resolve a question/query to the single most relevant ingested arXiv paper and return its paperId handle.",
+      "Resolve a paper title, arXiv ID, or bibliographic identifier to the single most relevant ingested arXiv paper and return its paperId handle. Prefer exact paper titles or IDs over topical descriptions. If the user explicitly names a paper, pass only that paper title or arXiv ID, not the full substantive question. Include broader topical query text only when no title or identifier is available.",
     schema: z.object({
       query: z
         .string()

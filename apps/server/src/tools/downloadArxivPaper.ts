@@ -78,9 +78,15 @@ export const downloadArxivPaper = tool(
       };
       const safePageContent = removeNullBytes(firstDocument.pageContent);
 
-      const summaryEmbedding = await embeddings.embedQuery(
+      const paperEmbeddingText = [
+        safeMetadata.title,
+        safeMetadata.authors.join(", "),
         safeMetadata.summary,
-      );
+      ]
+        .filter((value) => value.trim().length > 0)
+        .join("\n\n");
+
+      const summaryEmbedding = await embeddings.embedQuery(paperEmbeddingText);
 
       const preparedDocuments = (
         await documentSplitter.splitText(safePageContent)
@@ -107,7 +113,7 @@ export const downloadArxivPaper = tool(
             authors: safeMetadata.authors,
             publishedAt: parseDate(safeMetadata.published),
             updatedAt: parseDate(safeMetadata.updated),
-            summary: safeMetadata.summary,
+            summary: paperEmbeddingText,
             summaryEmbedding,
           })
           .returning({

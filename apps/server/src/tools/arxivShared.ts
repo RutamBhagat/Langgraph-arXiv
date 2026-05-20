@@ -15,20 +15,19 @@ export const embeddings =
         dimensions: 1536,
         baseUrl: "http://localhost:11434",
       })
-    : (() => {
-        if (!env.GOOGLE_API_KEY) {
-          throw new Error(
-            "GOOGLE_API_KEY is required when EMBEDDINGS_MODEL is not qwen3-embedding:8b."
-          );
-        }
-        return new Gemini1536Embeddings({
+    : env.GOOGLE_API_KEY
+      ? new Gemini1536Embeddings({
           model: "gemini-embedding-2",
           apiKey: env.GOOGLE_API_KEY,
-        });
-      })();
+        })
+      : (() => {
+          throw new Error(
+            "GOOGLE_API_KEY is required when EMBEDDINGS_MODEL is not qwen3-embedding:8b.",
+          );
+        })();
 
 export const documentSplitter = new RecursiveCharacterTextSplitter({
-  chunkSize: 4000,
+  chunkSize: 3000,
   chunkOverlap: 100,
 });
 

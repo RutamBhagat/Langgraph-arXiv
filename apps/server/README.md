@@ -126,7 +126,7 @@ export const agent = createAgent({
     // Auto-summarize long conversations
     summarizationMiddleware({
       model: "anthropic:claude-sonnet-4-5",
-      trigger: { tokens: 4000 },
+      trigger: { tokens: 3000 },
     }),
     // Require approval for sensitive operations
     humanInTheLoopMiddleware({

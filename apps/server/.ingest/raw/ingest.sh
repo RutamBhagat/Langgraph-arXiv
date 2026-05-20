@@ -16,7 +16,7 @@ jq -c '.[] | { arxivId }' "${METADATA_FILE}" | while IFS= read -r obj; do
   index=$((index + 1))
 
   arxiv_id="$(jq -r '.arxivId' <<< "${obj}")"
-  echo "[$index] POST ${ENDPOINT} arxivId=${arxiv_id}"
+  echo "Request ${index}: POST ${ENDPOINT} (arxivId=${arxiv_id})"
 
   response_file="$(mktemp)"
 
@@ -44,4 +44,5 @@ jq -c '.[] | { arxivId }' "${METADATA_FILE}" | while IFS= read -r obj; do
   cat "${response_file}"
   rm -f "${response_file}"
   echo
+  sleep 3
 done
