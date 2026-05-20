@@ -1,25 +1,26 @@
 # HTTP Ingest API
 
-Sources:
+Source files:
 
 - `apps/server/src/api/app.ts`
-- `apps/server/.ingest/raw`
+- `apps/server/.ingest/raw/ingest.sh`
+- `apps/server/.ingest/raw/metadata.json`
 - `apps/server/langgraph.json`
 
-## Purpose
+This part exists so we can ingest papers without chatting with the agent.
 
-The HTTP API exposes the download tool so raw paper metadata can be ingested without going through the chat agent.
+The agent has the download tool, but for batch ingest we expose that same tool over HTTP.
 
-Only `download_arxiv_paper` is exposed over HTTP in the current code.
+## The Route
 
-## Route
+The route is:
 
 ```http
 POST /tools/download-arxiv-paper
 Content-Type: application/json
 ```
 
-Request body:
+The body looks like:
 
 ```json
 {
@@ -27,33 +28,41 @@ Request body:
 }
 ```
 
-## Flow
+## Walkthrough
 
-1. The Hono app receives the POST request.
-2. It parses the JSON body.
-3. It validates the body with `downloadArxivPaper.schema`.
-4. It calls `downloadArxivPaper.invoke(parsed.data)`.
-5. It returns the tool result as JSON.
+Open `apps/server/src/api/app.ts`.
 
-Invalid JSON returns HTTP `400` with `Invalid JSON body`.
+You will see a small Hono app. It has one route.
 
-Schema validation failure returns HTTP `400` with the expected schema and Zod issues.
+When a request comes in, the route first tries to parse JSON. If the body is not valid JSON, it returns HTTP `400`.
 
-## Raw Ingest Script
+Then it validates the body using `downloadArxivPaper.schema`. That is the same schema declared on the LangChain tool, so the HTTP path and agent tool path agree on input shape.
 
-`apps/server/.ingest/raw/metadata.json` contains a list of arXiv IDs.
+If validation passes, the route calls:
 
-`apps/server/.ingest/raw/ingest.sh` reads that file with `jq` and posts each ID to:
+```ts
+downloadArxivPaper.invoke(parsed.data)
+```
+
+Then it returns the tool result as JSON.
+
+## Raw Ingest Folder
+
+`apps/server/.ingest/raw/metadata.json` is just a list of arXiv IDs.
+
+`apps/server/.ingest/raw/ingest.sh` reads that list with `jq`.
+
+For each row, it posts this body to:
 
 ```text
 http://localhost:2024/tools/download-arxiv-paper
 ```
 
-The script stops on the first non-2xx response. It sleeps three seconds between requests to avoid hammering the endpoint.
+The script stops if any request fails. It also sleeps three seconds between requests so we do not spam the local server or upstream arXiv flow.
 
-## LangGraph Server Exposure
+## How LangGraph Exposes It
 
-`apps/server/langgraph.json` exposes the Hono app through:
+`apps/server/langgraph.json` has this section:
 
 ```json
 {
@@ -63,4 +72,10 @@ The script stops on the first non-2xx response. It sleeps three seconds between 
 }
 ```
 
-When the LangGraph dev server is running, this makes the Hono route available beside the graph API.
+That tells the LangGraph server to import the Hono app and serve it beside the graph API.
+
+## What To Pay Attention To
+
+Only the download tool is exposed over HTTP here.
+
+Finding papers and querying paper chunks still happen through the agent tool loop.

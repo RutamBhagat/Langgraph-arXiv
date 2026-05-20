@@ -1,16 +1,14 @@
 # Find Paper Tool
 
-Source: `apps/server/src/tools/resolveArxivPaper.ts`
+Source file: `apps/server/src/tools/resolveArxivPaper.ts`
 
 Tool name: `resolve_arxiv_paper`
 
-## Purpose
+This is the lookup tool. Once papers are already indexed, this tool helps the agent figure out which paper the user is talking about.
 
-`resolve_arxiv_paper` finds the most relevant ingested paper for a title, arXiv ID, bibliographic identifier, or broad paper query.
+It does not download anything. If the paper is not already in the `papers` table, this tool cannot find it.
 
-This tool does not download new papers. It only searches papers already stored in the database.
-
-## Input
+## What Input Looks Like
 
 ```json
 {
@@ -18,20 +16,23 @@ This tool does not download new papers. It only searches papers already stored i
 }
 ```
 
-The schema requires a non-empty `query`.
+The input is just one non-empty string.
 
-## Flow
+In the prompt, we tell the agent to pass a clean title or arXiv ID when the user gives one. So if the user says "According to Attention Is All You Need...", the agent should search for `Attention Is All You Need`, not the whole question.
 
-1. Embed the query with the shared embedding model.
-2. Compare the query embedding against `papers.summaryEmbedding`.
-3. Rank papers by cosine similarity.
-4. Return the top three candidate papers.
+## Walkthrough
 
-The agent prompt asks the model to pass only the title or ID when the user names a specific paper. Broader topic text should be used only when the user does not provide an exact paper identifier.
+The tool embeds the query first.
 
-## Output
+Then it compares that query embedding against `papers.summaryEmbedding`.
 
-When matches exist, the tool returns:
+That `summaryEmbedding` was created by the download tool from the paper title, authors, and abstract. So this search is paper-level search, not chunk-level search.
+
+The database query ranks rows by cosine similarity and returns the top three candidates.
+
+## Return Values
+
+When it finds matches, the shape is:
 
 ```json
 {
@@ -46,7 +47,7 @@ When matches exist, the tool returns:
 }
 ```
 
-If no papers exist in the index, it returns:
+If there are no indexed papers, it returns:
 
 ```json
 {
@@ -54,6 +55,8 @@ If no papers exist in the index, it returns:
 }
 ```
 
-## Downstream Use
+## What To Pay Attention To
 
-The important value is `paperId`. The agent should pass that ID to `query_arxiv_paper_docs` before answering paper-specific questions.
+The main output is `paperId`.
+
+The agent should take that `paperId` and pass it into `query_arxiv_paper_docs`. Do not treat this tool as the answer source. It only identifies the paper.

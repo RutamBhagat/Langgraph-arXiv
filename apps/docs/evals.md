@@ -1,40 +1,56 @@
 # Evals
 
-Source: `apps/server/src/evals`
+Source folder: `apps/server/src/evals`
 
-## Files
+This folder is where we check whether the agent behaves correctly on a fixed set of examples.
 
-- `eval.json`: hand-written evaluation cases.
-- `runEval.ts`: loads the dataset, runs the agent, and grades outputs in LangSmith.
+There are two files to know:
 
-## Dataset Shape
+- `eval.json`
+- `runEval.ts`
 
-Each eval case contains:
+## `eval.json`
+
+Think of `eval.json` as the assignment rubric in data form.
+
+Each case has:
 
 - `id`
 - `input_question`
-- `expected_behavior`: `answer`, `clarify`, or `refuse`
+- `expected_behavior`
 - `reference_answer`
 - `grading_notes`
 
-The cases cover paper QA, ambiguity handling, refusal behavior, and exact calculator use.
+`expected_behavior` is one of three values:
 
-## Runtime Flow
+- `answer`: the agent should answer.
+- `clarify`: the agent should ask a clarification question.
+- `refuse`: the agent should avoid answering directly.
+
+The cases cover paper QA, ambiguous paper names, medical refusal behavior, and calculator use.
+
+## `runEval.ts`
+
+This is the script that sends those cases to LangSmith.
+
+At the top, it imports the real `agent` and `model` from `apps/server/src/agent.ts`. That part matters. We are not testing a fake agent path here.
+
+The script does this:
 
 1. Read `eval.json`.
-2. Delete the existing LangSmith dataset named `eval` if it exists.
-3. Recreate the dataset with the current cases.
-4. Insert each case as a LangSmith example.
-5. Invoke the agent with `input_question`.
-6. Take the final agent message as `{ answer }`.
-7. Grade the answer with an LLM-as-judge evaluator.
-8. Store results under a LangSmith experiment prefix of `skyclad-agent`.
+2. Connect to LangSmith with `new Client()`.
+3. Delete the existing dataset named `eval` if it exists.
+4. Recreate the dataset.
+5. Insert each JSON case as a LangSmith example.
+6. Invoke the real agent with the example question.
+7. Take the last agent message as the answer.
+8. Grade that answer with an LLM judge.
 
-## Judge
+## The Judge
 
-`createLLMAsJudge` from `openevals` is used with a custom rubric prompt.
+The judge is created with `createLLMAsJudge` from `openevals`.
 
-The judge returns JSON with:
+The prompt tells the judge to return JSON with:
 
 ```json
 {
@@ -43,8 +59,12 @@ The judge returns JSON with:
 }
 ```
 
-The feedback key is `assignment_score`, so LangSmith shows the score under that name.
+The feedback key is `assignment_score`, so that is the score name you see in LangSmith.
 
-## Important Detail
+## What To Pay Attention To
 
-The eval runner uses the same exported `agent` and `model` from `apps/server/src/agent.ts`. That means evals exercise the real tool-access agent path instead of a separate mock implementation.
+These evals are not unit tests.
+
+They are LangSmith experiments. They run the real agent, record traces, and then use another model call to judge whether the answer matched the expected behavior.
+
+The experiment prefix is `skyclad-agent`.

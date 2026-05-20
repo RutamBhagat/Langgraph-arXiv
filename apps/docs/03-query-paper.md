@@ -1,16 +1,20 @@
 # Query Paper Tool
 
-Source: `apps/server/src/tools/queryArxivPaperDocs.ts`
+Source file: `apps/server/src/tools/queryArxivPaperDocs.ts`
 
 Tool name: `query_arxiv_paper_docs`
 
-## Purpose
+This is the evidence retrieval tool. By the time the agent calls this, it should already know which paper we mean.
 
-`query_arxiv_paper_docs` retrieves the best evidence chunks from one ingested paper.
+So the sequence is important:
 
-It does not search across papers. It needs a `paperId` that was already returned by `resolve_arxiv_paper`.
+1. Download/index the paper if needed.
+2. Resolve the paper with `resolve_arxiv_paper`.
+3. Query that paper with `query_arxiv_paper_docs`.
 
-## Input
+This tool searches inside one paper only. It does not choose between papers.
+
+## What Input Looks Like
 
 ```json
 {
@@ -20,29 +24,41 @@ It does not search across papers. It needs a `paperId` that was already returned
 }
 ```
 
-`paperId` and `question` must be non-empty strings. `lexicalQuery` can be an empty string when exact terms are not useful.
+`paperId` is the ID from the find-paper step.
 
-## Flow
+`question` is the actual user question.
 
-1. Embed the question.
-2. Run semantic vector search against `paperDocuments.embedding` for the selected `paperId`.
-3. Run PostgreSQL full-text search against `paperDocuments.pageContentSearch` when `lexicalQuery` is not empty.
-4. Fuse semantic and lexical rankings with reciprocal rank fusion.
-5. Keep the top three document chunks.
-6. Fetch the chunk text and return chunks in fused-rank order.
+`lexicalQuery` is for exact keyword matching. It can be an empty string if there are no useful exact terms.
 
-## Retrieval Settings
+## Walkthrough
 
-Defined in `apps/server/src/tools/arxivShared.ts`:
+First, the tool embeds the question.
+
+Then it runs vector search against `paperDocuments.embedding`, but only for rows with the selected `paperId`.
+
+After that, it optionally runs PostgreSQL full-text search against `paperDocuments.pageContentSearch`. This only happens when `lexicalQuery` is not empty.
+
+So we have two rankings:
+
+- Semantic ranking from embeddings.
+- Lexical ranking from exact text search.
+
+The tool merges those rankings with reciprocal rank fusion. That gives one combined ranking that can reward chunks found by either search method.
+
+Finally, it keeps the top three chunk IDs, fetches the chunk text, and returns the chunks in ranked order.
+
+## Current Retrieval Settings
+
+These constants live in `apps/server/src/tools/arxivShared.ts`:
 
 - `DOCUMENT_VECTOR_LIMIT = 80`
 - `LEXICAL_LIMIT = 80`
 - `TOP_DOCUMENT_CHUNKS = 3`
 - `RRF_K = 60`
 
-## Output
+## Return Values
 
-When matches exist, the tool returns:
+When retrieval works, the tool returns:
 
 ```json
 {
@@ -58,7 +74,7 @@ When matches exist, the tool returns:
 }
 ```
 
-If no chunks match, it returns:
+If nothing matches, it returns:
 
 ```json
 {
@@ -67,6 +83,8 @@ If no chunks match, it returns:
 }
 ```
 
-## Agent Responsibility
+## What To Pay Attention To
 
-The tool returns evidence. The agent still has to read the chunks, answer the user, and avoid answering when the retrieved evidence is not enough.
+This tool gives the agent evidence. It does not write the final answer.
+
+The final answer still depends on the model reading these chunks and deciding whether the evidence is enough.
