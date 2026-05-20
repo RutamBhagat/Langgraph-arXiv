@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "license": "MIT",
   "description": "A modern starter template for building agentic applications using LangChain's createAgent.",
-  "main": "src/index.ts",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,7 +12,6 @@
     "clean": "rm -rf dist",
     "dev": "langgraphjs dev",
     "eval": "tsx src/evals/runEval.ts",
-    "start": "tsx src/index.ts",
     "lint": "eslint src"
   },
   "dependencies": {

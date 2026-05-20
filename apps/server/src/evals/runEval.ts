@@ -8,9 +8,7 @@ import { createLLMAsJudge } from "openevals";
 import { agent, model } from "../agent.js";
 
 const DATASET_NAME = "eval";
-const DATASET_PATH = fileURLToPath(
-  new URL("./eval.json", import.meta.url),
-);
+const DATASET_PATH = fileURLToPath(new URL("./eval.json", import.meta.url));
 
 type ExpectedBehavior = "answer" | "clarify" | "refuse";
 
@@ -50,6 +48,8 @@ Reference answer and grading notes:
 const assignmentJudge = createLLMAsJudge({
   prompt: JUDGE_PROMPT,
   feedbackKey: "assignment_score",
+  // needed for eval cost issue
+  // @ts-expect-error - model type mismatch is expected
   judge: model,
 });
 
