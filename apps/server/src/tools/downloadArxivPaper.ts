@@ -34,6 +34,7 @@ function getSafeErrorMessage(error: unknown): string {
 export const downloadArxivPaper = tool(
   async ({ arxivId }) => {
     try {
+      console.log(`[download_arxiv_paper] checking database for ${arxivId}`);
       const existingPaper = await db
         .select({
           paperId: papers.id,
@@ -44,19 +45,30 @@ export const downloadArxivPaper = tool(
         .limit(1);
 
       if (existingPaper.length > 0) {
+        console.log(`[download_arxiv_paper] already ingested ${arxivId}`);
         return {
           status: "skipped_existing",
           ...existingPaper[0],
         };
       }
 
+      console.log(
+        `[download_arxiv_paper] creating arXiv retriever for ${arxivId}`,
+      );
       const retriever = new ArxivRetriever({
         getFullDocuments: true,
         maxSearchResults: 1,
       });
+      console.log(`[download_arxiv_paper] fetching arXiv document for ${arxivId}`);
       const documents = await retriever.invoke(arxivId);
+      console.log(
+        `[download_arxiv_paper] arXiv returned ${documents.length} document(s) for ${arxivId}`,
+      );
 
       if (documents.length === 0) {
+        console.log(
+          `[download_arxiv_paper] no arXiv document found for ${arxivId}`,
+        );
         return { status: "not_found", arxivId: arxivId };
       }
 
@@ -77,6 +89,9 @@ export const downloadArxivPaper = tool(
         summary: removeNullBytes(metadata.summary),
       };
       const safePageContent = removeNullBytes(firstDocument.pageContent);
+      console.log(
+        `[download_arxiv_paper] cleaned arXiv document for ${arxivId} (${safePageContent.length} chars)`,
+      );
 
       const paperEmbeddingText = [
         safeMetadata.title,
@@ -86,14 +101,20 @@ export const downloadArxivPaper = tool(
         .filter((value) => value.trim().length > 0)
         .join("\n\n");
 
+      console.log(`[download_arxiv_paper] embedding summary for ${arxivId}`);
       const summaryEmbedding = await embeddings.embedQuery(paperEmbeddingText);
+      console.log(`[download_arxiv_paper] embedded summary for ${arxivId}`);
 
+      console.log(`[download_arxiv_paper] splitting document for ${arxivId}`);
       const preparedDocuments = (
         await documentSplitter.splitText(safePageContent)
       ).map((pageContent, chunkIndex) => ({
         chunkIndex,
         pageContent,
       }));
+      console.log(
+        `[download_arxiv_paper] split ${arxivId} into ${preparedDocuments.length} chunk(s)`,
+      );
 
       const documentEmbeddings =
         preparedDocuments.length === 0

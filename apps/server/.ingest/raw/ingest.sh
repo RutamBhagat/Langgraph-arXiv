@@ -44,5 +44,4 @@ jq -c '.[] | { arxivId }' "${METADATA_FILE}" | while IFS= read -r obj; do
   cat "${response_file}"
   rm -f "${response_file}"
   echo
-  sleep 3
 done
