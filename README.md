@@ -113,7 +113,17 @@ The eval harness lives in `apps/server/src/evals`.
 
 `eval.json` contains the fixed assignment cases. The cases cover normal paper-grounded answers, ambiguous paper references, refusal behavior, a long-context failure-mode question, and calculator use.
 
-`runEval.ts` creates a LangSmith dataset, invokes the real exported agent, and grades the final answer with an LLM-as-judge evaluator from `openevals`. The feedback key is `assignment_score`.
+`runEval.ts` creates a LangSmith dataset, runs three agent variants, and grades each final answer with an LLM-as-judge evaluator from `openevals`. The feedback key is `assignment_score`.
+
+The variants all expose the same `query_arxiv_paper_docs` tool name to the agent. Only the retrieval implementation changes:
+
+- `namespace-top-k-lexical-rrf`: current production retrieval, scoped to `paperId`, using vector search, optional PostgreSQL lexical search, and Reciprocal Rank Fusion.
+- `namespace-top-k`: vector top-k retrieval scoped to the resolved `paperId`.
+- `global-top-k`: vector top-k retrieval across all indexed chunks.
+
+The ablation-only tools live in `apps/server/src/tools/ablation/queryArxivPaperDocs.ts`; the production hybrid tool remains in `apps/server/src/tools/queryArxivPaperDocs.ts`.
+
+At the end, the script prints a per-case comparison matrix plus a summary table with pass counts, accuracy, and LangSmith project links for each variant.
 
 Run it with:
 
@@ -141,7 +151,7 @@ If the user asks a high-stakes or out-of-domain question, the agent should refus
 
 ## Known Limitations
 
-The current eval harness scores behavior, but it does not yet run an automated retrieval ablation matrix. The main ablation I would run is scoped hybrid retrieval versus global vector top-k, because that directly tests the biggest retrieval decision in the project.
+The eval harness now runs an automated retrieval ablation matrix, but it still uses one judge style for all behavior types. The calculator case would be better as deterministic exact-match scoring, while answer, clarify, and refuse cases can stay LLM-judged with strict grading notes.
 
 The agent depends on the model following tool instructions. Tool schemas and the system prompt reduce mistakes, and LangSmith makes mistakes visible, but model tool choice is still probabilistic.
 
@@ -149,11 +159,11 @@ The corpus is only what has been ingested. This is intentional: normal QA should
 
 ## What I Would Do With Another Week
 
-First, I would add automated retrieval ablations:
+First, I would expand the retrieval ablations:
 
-- paper-scoped hybrid retrieval versus global vector search;
-- hybrid RRF versus vector-only within the resolved paper;
 - `TOP_DOCUMENT_CHUNKS` values of 3, 5, and 8.
+- lexical-only retrieval inside the resolved paper.
+- hybrid retrieval with and without agent-authored lexical queries.
 
 Second, I would split eval scoring by behavior type. The calculator case should be deterministic exact-match scoring, while answer/clarify/refuse cases can stay LLM-judged with strict grading notes.
 

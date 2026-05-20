@@ -4,10 +4,11 @@ Source folder: `apps/server/src/evals`
 
 This folder is where we check whether the agent behaves correctly on a fixed set of examples.
 
-There are two files to know:
+There are three paths to know:
 
 - `eval.json`
 - `runEval.ts`
+- `../tools/ablation/queryArxivPaperDocs.ts`
 
 ## `eval.json`
 
@@ -31,9 +32,9 @@ The cases cover paper QA, ambiguous paper names, medical refusal behavior, and c
 
 ## `runEval.ts`
 
-This is the script that sends those cases to LangSmith.
+This is the script that sends those cases to LangSmith and compares retrieval variants.
 
-At the top, it imports the real `agent` and `model` from `apps/server/src/agent.ts`. That part matters. We are not testing a fake agent path here.
+The script uses the same model, system prompt, and non-retrieval tools as the real agent. The only thing it swaps is the implementation behind the `query_arxiv_paper_docs` tool name.
 
 The script does this:
 
@@ -42,9 +43,46 @@ The script does this:
 3. Delete the existing dataset named `eval` if it exists.
 4. Recreate the dataset.
 5. Insert each JSON case as a LangSmith example.
-6. Invoke the real agent with the example question.
-7. Take the last agent message as the answer.
-8. Grade that answer with an LLM judge.
+6. Build three eval agents that differ only in retrieval.
+7. Run each agent against the full dataset.
+8. Take the last agent message as the answer.
+9. Grade that answer with an LLM judge.
+10. Print a comparison matrix and LangSmith links.
+
+The three retrieval variants are:
+
+- `namespace-top-k-lexical-rrf`: the current production retrieval tool, scoped to `paperId`, with vector retrieval, optional PostgreSQL lexical search, and Reciprocal Rank Fusion.
+- `namespace-top-k`: vector top-k retrieval scoped to the resolved `paperId`.
+- `global-top-k`: vector top-k retrieval across all indexed document chunks.
+
+All three variants expose the same LangChain tool name:
+
+```ts
+name: "query_arxiv_paper_docs"
+```
+
+That keeps the agent interface fixed while changing only the retrieval technique underneath.
+
+## Ablation Tools
+
+The ablation-only retrieval tools live in:
+
+```text
+apps/server/src/tools/ablation/queryArxivPaperDocs.ts
+```
+
+That file exports direct tool constants, not factories:
+
+- `globalTopKQueryArxivPaperDocs`
+- `namespaceTopKQueryArxivPaperDocs`
+
+The production hybrid tool remains in:
+
+```text
+apps/server/src/tools/queryArxivPaperDocs.ts
+```
+
+`runEval.ts` imports all three tools and chooses which one to attach to each eval agent.
 
 ## The Judge
 
@@ -65,6 +103,15 @@ The feedback key is `assignment_score`, so that is the score name you see in Lan
 
 These evals are not unit tests.
 
-They are LangSmith experiments. They run the real agent, record traces, and then use another model call to judge whether the answer matched the expected behavior.
+They are LangSmith experiments. They run real agent loops, record traces, and then use another model call to judge whether each answer matched the expected behavior.
 
-The experiment prefix is `skyclad-agent`.
+The experiment prefixes are:
+
+- `skyclad-agent-namespace-top-k-lexical-rrf`
+- `skyclad-agent-namespace-top-k`
+- `skyclad-agent-global-top-k`
+
+At the end, the script prints:
+
+- an ablation comparison matrix by eval case;
+- a summary table with passed count, total count, accuracy, and LangSmith URL.

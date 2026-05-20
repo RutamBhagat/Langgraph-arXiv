@@ -7,7 +7,7 @@ import { env } from "@skyclad_langgraph/env/server";
 
 export const model = env.OPENAI_PROXY_BASE_URL
   ? new ChatOpenAI({
-      model: "gpt-5.5",
+      model: "gpt-5.4-mini",
       configuration: {
         baseURL: env.OPENAI_PROXY_BASE_URL,
       },
@@ -15,7 +15,7 @@ export const model = env.OPENAI_PROXY_BASE_URL
       apiKey: env.OPENAI_API_KEY ?? "not-needed",
       metadata: {
         ls_provider: "openai",
-        ls_model_name: "gpt-5.5",
+        ls_model_name: "gpt-5.4-mini",
       },
     })
   : env.GOOGLE_API_KEY

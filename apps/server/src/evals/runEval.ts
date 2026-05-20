@@ -1,16 +1,31 @@
 import "dotenv/config";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { createAgent } from "langchain";
 import { Client } from "langsmith";
 import { evaluate } from "langsmith/evaluation";
 import type { ExampleCreate } from "langsmith/schemas";
 import { createLLMAsJudge } from "openevals";
-import { agent, model } from "../agent.js";
+import { model } from "../agent.js";
+import { SYSTEM_PROMPT } from "../prompts.js";
+import {
+  globalTopKQueryArxivPaperDocs,
+  namespaceTopKQueryArxivPaperDocs,
+  type QueryArxivPaperDocsTool,
+} from "../tools/ablation/queryArxivPaperDocs.js";
+import { downloadArxivPaper } from "../tools/downloadArxivPaper.js";
+import { calculator } from "../tools/index.js";
+import { queryArxivPaperDocs } from "../tools/queryArxivPaperDocs.js";
+import { resolveArxivPaper } from "../tools/resolveArxivPaper.js";
 
 const DATASET_NAME = "eval";
 const DATASET_PATH = fileURLToPath(new URL("./eval.json", import.meta.url));
 
 type ExpectedBehavior = "answer" | "clarify" | "refuse";
+type AblationName =
+  | "global-top-k"
+  | "namespace-top-k"
+  | "namespace-top-k-lexical-rrf";
 
 type EvalCase = {
   id: string;
@@ -22,6 +37,15 @@ type EvalCase = {
 
 type EvalInputs = {
   input_question: string;
+};
+
+type AblationResult = {
+  name: AblationName;
+  experimentName: string;
+  langsmithUrl: string;
+  scoresByEvalCaseId: Map<string, boolean | null>;
+  passed: number;
+  total: number;
 };
 
 const JUDGE_PROMPT = `You are grading an agent answer for a research-paper RAG assignment.
@@ -65,6 +89,64 @@ async function evaluateAssignment(params: {
   });
 }
 
+function createEvalAgent(queryTool: QueryArxivPaperDocsTool) {
+  return createAgent({
+    model,
+    tools: [calculator, downloadArxivPaper, resolveArxivPaper, queryTool],
+    systemPrompt: SYSTEM_PROMPT,
+  });
+}
+
+function scoreLabel(score: boolean | null) {
+  if (score === true) {
+    return "PASS";
+  }
+  if (score === false) {
+    return "FAIL";
+  }
+  return "N/A";
+}
+
+function getAssignmentScore(
+  evaluationResults: Awaited<ReturnType<typeof evaluate>>["results"][number]["evaluationResults"],
+) {
+  const score = evaluationResults.results.find(
+    (result) => result.key === "assignment_score",
+  )?.score;
+
+  return typeof score === "boolean" ? score : null;
+}
+
+function printAblationMatrix(results: AblationResult[], evalCases: EvalCase[]) {
+  const rows = evalCases.map((evalCase) => {
+    const row: Record<string, string> = {
+      eval: evalCase.id,
+    };
+
+    for (const result of results) {
+      row[result.name] = scoreLabel(
+        result.scoresByEvalCaseId.get(evalCase.id) ?? null,
+      );
+    }
+
+    return row;
+  });
+
+  console.log("\nAblation comparison matrix");
+  console.table(rows);
+
+  console.log("Ablation summary");
+  console.table(
+    results.map((result) => ({
+      ablation: result.name,
+      passed: result.passed,
+      total: result.total,
+      accuracy: result.total === 0 ? "0.00" : (result.passed / result.total).toFixed(2),
+      langsmith: result.langsmithUrl,
+    })),
+  );
+}
+
 const data = await readFile(DATASET_PATH, "utf8");
 const evalCases = JSON.parse(data) as EvalCase[];
 
@@ -94,20 +176,68 @@ const examples: ExampleCreate[] = evalCases.map((evalCase) => ({
 
 await client.createExamples(examples);
 
-async function runAgent(inputs: EvalInputs): Promise<{ answer: string }> {
-  const result = await agent.invoke({
-    messages: [{ role: "user", content: inputs.input_question }],
+const ablations: { name: AblationName; queryTool: QueryArxivPaperDocsTool }[] = [
+  {
+    name: "namespace-top-k-lexical-rrf",
+    queryTool: queryArxivPaperDocs,
+  },
+  {
+    name: "namespace-top-k",
+    queryTool: namespaceTopKQueryArxivPaperDocs,
+  },
+  {
+    name: "global-top-k",
+    queryTool: globalTopKQueryArxivPaperDocs,
+  },
+];
+
+const ablationResults: AblationResult[] = [];
+
+for (const ablation of ablations) {
+  const evalAgent = createEvalAgent(ablation.queryTool);
+
+  async function runAgent(inputs: EvalInputs): Promise<{ answer: string }> {
+    const result = await evalAgent.invoke({
+      messages: [{ role: "user", content: inputs.input_question }],
+    });
+
+    const answer = result.messages.at(-1)?.text ?? "";
+
+    return { answer };
+  }
+
+  const experimentResults = await evaluate(runAgent, {
+    data: DATASET_NAME,
+    evaluators: [evaluateAssignment],
+    experimentPrefix: `skyclad-agent-${ablation.name}`,
+    metadata: {
+      ablation: ablation.name,
+    },
+    maxConcurrency: 1,
+    client,
   });
 
-  const answer = result.messages.at(-1)?.text ?? "";
+  const scoresByEvalCaseId = new Map<string, boolean | null>();
+  for (const row of experimentResults.results) {
+    const evalCaseId =
+      typeof row.example.metadata?.id === "string" ? row.example.metadata.id : row.example.id;
+    scoresByEvalCaseId.set(evalCaseId, getAssignmentScore(row.evaluationResults));
+  }
 
-  return { answer };
+  const scoredValues = [...scoresByEvalCaseId.values()];
+  const passed = scoredValues.filter((score) => score === true).length;
+  const langsmithUrl = await client.getProjectUrl({
+    projectName: experimentResults.experimentName,
+  });
+
+  ablationResults.push({
+    name: ablation.name,
+    experimentName: experimentResults.experimentName,
+    langsmithUrl,
+    scoresByEvalCaseId,
+    passed,
+    total: scoredValues.length,
+  });
 }
 
-await evaluate(runAgent, {
-  data: DATASET_NAME,
-  evaluators: [evaluateAssignment],
-  experimentPrefix: "skyclad-agent",
-  maxConcurrency: 1,
-  client,
-});
+printAblationMatrix(ablationResults, evalCases);
