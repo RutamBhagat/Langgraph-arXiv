@@ -10,7 +10,6 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "check-types": "turbo check-types",
-    "dev:web": "turbo -F web dev",
     "dev:server": "turbo -F server dev",
     "eval": "turbo -F server eval",
     "db:push": "turbo -F @skyclad_langgraph/db db:push",
