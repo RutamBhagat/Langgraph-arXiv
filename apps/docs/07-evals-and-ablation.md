@@ -28,7 +28,7 @@ The cases cover paper Q&A, ambiguous paper names, medical refusal behavior, and 
 
 This is the script that sends those cases to LangSmith and compares retrieval variants.
 
-The script uses the same tools as the real agent. The only thing it swaps is the implementation of the `query_arxiv_paper_docs` tool, so each run uses a different retrieval strategy.
+The script uses the same LangGraph agent factory as the real agent. The only thing it swaps is the implementation of the `query_arxiv_paper_docs` tool, so each run uses a different retrieval strategy.
 
 The script does this:
 
@@ -37,7 +37,7 @@ The script does this:
 3. Delete the existing dataset named `eval` if it exists. (This was required to make edits to the eval.json file and have them reflect in the dataset)
 4. Recreate the dataset.
 5. Insert each JSON case as a LangSmith example.
-6. Build three eval agents that differ only in retrieval.
+6. Build three eval graphs that differ only in retrieval.
 7. Run each agent against the full dataset.
 8. Take the last agent message as the answer.
 9. Grade that answer with an LLM judge.
@@ -55,7 +55,7 @@ All three variants expose the same LangChain tool name:
 name: "query_arxiv_paper_docs"
 ```
 
-That keeps the same agent and only changes the retrieval technique.
+That keeps the same graph loop and only changes the retrieval technique.
 
 ## Ablation Tools
 

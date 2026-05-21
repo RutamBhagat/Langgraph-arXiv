@@ -1,6 +1,7 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatGoogle } from "@langchain/google";
 import { SystemMessage } from "@langchain/core/messages";
+import type { StructuredToolInterface } from "@langchain/core/tools";
 import {
   END,
   START,
@@ -45,18 +46,7 @@ const baseModel = env.OPENAI_PROXY_BASE_URL
 
 export const model = baseModel.withConfig({ metadata });
 
-const modelWithTools = baseModel.bindTools(TOOLS).withConfig({ metadata });
-
-const callModel = async (state: typeof MessagesAnnotation.State) => {
-  const response = await modelWithTools.invoke([
-    new SystemMessage(SYSTEM_PROMPT),
-    ...state.messages,
-  ]);
-
-  return {
-    messages: [response],
-  };
-};
+export type AgentTool = StructuredToolInterface;
 
 const shouldContinue = (state: typeof MessagesAnnotation.State) => {
   const lastMessage = state.messages.at(-1);
@@ -73,10 +63,27 @@ const shouldContinue = (state: typeof MessagesAnnotation.State) => {
   return END;
 };
 
-export const agent = new StateGraph(MessagesAnnotation)
-  .addNode("agent", callModel)
-  .addNode("tools", new ToolNode(TOOLS))
-  .addEdge(START, "agent")
-  .addConditionalEdges("agent", shouldContinue)
-  .addEdge("tools", "agent")
-  .compile();
+export function createAgentGraph(tools: AgentTool[]) {
+  const modelWithTools = baseModel.bindTools(tools).withConfig({ metadata });
+
+  const callModel = async (state: typeof MessagesAnnotation.State) => {
+    const response = await modelWithTools.invoke([
+      new SystemMessage(SYSTEM_PROMPT),
+      ...state.messages,
+    ]);
+
+    return {
+      messages: [response],
+    };
+  };
+
+  return new StateGraph(MessagesAnnotation)
+    .addNode("agent", callModel)
+    .addNode("tools", new ToolNode(tools))
+    .addEdge(START, "agent")
+    .addConditionalEdges("agent", shouldContinue)
+    .addEdge("tools", "agent")
+    .compile();
+}
+
+export const agent = createAgentGraph(TOOLS);

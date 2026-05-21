@@ -72,9 +72,9 @@ The proxy path exists so the project can be run through a local OpenAI-compatibl
 
 The corpus is an equivalent technical-paper corpus of 50 famous and foundational arXiv papers rather than a last-90-days cs.AI scrape. I chose this because these papers are well-known enough to support meaningful hand-written evals, cover the core ideas behind modern LLM and agent systems, and make retrieval failures easier to inspect than a random recent-paper sample.
 
-The ingest path uses LangChain's arXiv retriever with `getFullDocuments: true`. it gets metadata and paper text through langchains maintained integration and avoids a custom PDF or TeX extraction system.
+The ingest path uses LangChain's arXiv retriever with `getFullDocuments: true`. It gets metadata and paper text through LangChain's maintained integration and avoids a custom PDF or TeX extraction system.
 
-Chunks are made with `RecursiveCharacterTextSplitter` at 3000 characters with 100 characters of overlap. That is simple and effective. The agent retrieves only three final chunks, so the chunk size needs enough local context for an answer without flooding the model with unrelated paper text. The chunk size is is roughly one paragraph section of the paper.
+Chunks are made with `RecursiveCharacterTextSplitter` at 3000 characters with 100 characters of overlap. That is simple and effective. The agent retrieves only three final chunks, so each chunk needs enough local context for an answer without flooding the model with unrelated paper text. This size is roughly one paragraph section of a paper.
 
 ### Retrieval Design
 
@@ -96,13 +96,13 @@ A reranker is useful when the first-stage retriever returns a noisy candidate se
 
 The useful memory for this project is conversation memory: the current message history in the LangGraph agent session. Follow-up questions can use the earlier paper mention, earlier clarification, and earlier tool observations.
 
-I did not add semantic user memory or episodic long-term memory. This is a paper-grounded RAG system, not a personal assistant. Persisting user facts would not improve answers about indexed papers, and it would create extra retrieval, privacy, freshness, and evaluation problems.
+I did not add semantic user memory or episodic long-term user memory. This is a paper-grounded RAG system, not a personal assistant. Persisting user facts would not improve deterministic answers about indexed papers, and it would create extra retrieval, privacy, freshness, and evaluation problems.
 
 The paper context itself is the semantic memory. The agent trace is captured through LangSmith.
 
 ### Context and Cache Policy
 
-Modern model context windows are large enough for this app's active chat state plus three retrieved chunks. Gemini and Claude has up to 1M tokens for recent API models. That does not mean "stuff everything forever"; the `Lost in the Middle` result shows long-context models can still use information less reliably depending on where it appears. But practically for the current conversation and retrieved context, we do not need a summarizing memory layer.
+Modern model context windows are large enough for this app's active chat state plus three retrieved chunks. Gemini and Claude have offered up to 1M-token context windows in recent API models. That does not mean "stuff everything forever"; the `Lost in the Middle` result shows long-context models can still use information less reliably depending on where it appears. But practically for the current conversation and retrieved context, we do not need a summarizing memory layer.
 
 Dropping early messages can also make provider prompt caching worse. OpenAI's prompt caching depends on exact prefix matches, so removing or rewriting early turns changes the prefix. For agent sessions with stable system prompts and tool schemas, preserving the prefix is cheaper and faster than constantly compacting it or removing earlier turns to keep only last N turns.
 
@@ -112,9 +112,9 @@ The eval harness is in `apps/server/src/evals`.
 
 `eval.json` contains the fixed evaluation cases. The cases cover normal paper-grounded answers, ambiguous paper references, refusal behavior, and calculator use.
 
-`runEval.ts` creates a LangSmith dataset, runs three agent variants, and grades each final answer with an LLM-as-judge evaluator from `openevals`. The feedback key is `assignment_score`.
+`runEval.ts` creates a LangSmith dataset, runs three variants of the same LangGraph agent, and grades each final answer with an LLM-as-judge evaluator from `openevals`. The feedback key is `assignment_score`.
 
-The variants all expose the same `query_arxiv_paper_docs` tool name to the agent. Only the retrieval implementation changes:
+The variants all use the same graph loop and expose the same `query_arxiv_paper_docs` tool name to the agent. Only the retrieval implementation changes:
 
 - `namespace-top-k-lexical-rrf`: current production retrieval, scoped to `paperId`, using vector search, optional PostgreSQL lexical search, and Reciprocal Rank Fusion.
 - `namespace-top-k`: vector top-k retrieval scoped to the resolved `paperId`.
@@ -122,7 +122,7 @@ The variants all expose the same `query_arxiv_paper_docs` tool name to the agent
 
 The ablation-only tools are in `apps/server/src/tools/ablation/queryArxivPaperDocs.ts`, the production hybrid tool is in `apps/server/src/tools/queryArxivPaperDocs.ts`.
 
-At the end, the script prints a per-case comparison matrix plus a summary table with pass counts, accuracy, and LangSmith project links for each variant.
+At the end, the script prints a per-case comparison matrix plus a summary table with pass counts, accuracy, and LangSmith project links for each variant. The durable eval results live in the linked LangSmith experiment dashboards, including the agent traces, judge scores, feedback, timing, token usage, and provider metadata.
 
 Run it with:
 
@@ -146,23 +146,23 @@ If the paper is not indexed, `resolve_arxiv_paper` returns `not_found`.
 
 If retrieved chunks are not enough, the agent should say it does not know from the indexed evidence. This is better than using general model memory for a grounded context question.
 
-If the user asks a out-of-domain question, the agent should refuse direct advice and offer a safer general alternative when appropriate.
+If the user asks an out-of-domain question, the agent should refuse direct advice and offer a safer general alternative when appropriate.
 
 ## Known Limitations
 
 The corpus is only what has been ingested. This is intentional: normal QA should not silently download new papers unless the user explicitly asks to fetch or index them.
 
-The architecture is intentially designed to be a replica of context7's architecture, with some modifications to fit the requirements of this project.
+The architecture is intentionally close to Context7's retrieval shape, with modifications for paper-level resolution, arXiv ingestion, and the assignment's agent requirements.
 
-In my opinion, the way context7 handles the retrieval of coding documentation is the best approach and is scalable to millions of users.
+Context7's two-step pattern works well for this problem: resolve the right source first, then retrieve within that source instead of searching every chunk globally.
 
 ## What I Would Do With Another Week
 
 First, I would expand the retrieval ablations:
 
-- try a answer only system which removes all the previous tool calls and its answers from the response after the llm generates the response
+- try an answer-only variant that removes previous tool calls and tool observations from the response context before the model writes the final answer
 
-- I would add reranking to the ablation to see if it actually makes the agent better at retrieving relevant information.
+- add reranking to the ablation to see if it actually makes the agent better at retrieving relevant information.
 
 ## Project Docs
 

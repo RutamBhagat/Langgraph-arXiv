@@ -47,7 +47,7 @@ The actual graph is created with:
 ```ts
 new StateGraph(MessagesAnnotation)
   .addNode("agent", callModel)
-  .addNode("tools", new ToolNode(TOOLS))
+  .addNode("tools", new ToolNode(tools))
   .addEdge(START, "agent")
   .addConditionalEdges("agent", shouldContinue)
   .addEdge("tools", "agent")
@@ -76,13 +76,18 @@ It tells the agent how to choose between the tools:
 - Use the calculator for math.
 - Refuse grounded-answer requests when it cannot find relevant papers.
 
+The production `agent` is created by calling `createAgentGraph(TOOLS)`. The eval runner calls the same graph factory with a different `query_arxiv_paper_docs` implementation for each ablation.
+
 ## Exports
 
-The file exports two things:
+The file exports three things:
 
 - `model`
+- `createAgentGraph`
 - `agent`
 
 `agent` is what LangGraph Studio and the graph server run.
 
-`model` is also reused by the eval script as the LLM judge model.
+`createAgentGraph` is reused by the eval script so the evaluated path is the same graph loop as production.
+
+`model` is reused by the eval script as the LLM judge model.

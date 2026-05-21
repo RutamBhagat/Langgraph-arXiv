@@ -1,13 +1,11 @@
 import "dotenv/config";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { createAgent } from "langchain";
 import { Client } from "langsmith";
 import { evaluate } from "langsmith/evaluation";
 import type { ExampleCreate } from "langsmith/schemas";
 import { createLLMAsJudge } from "openevals";
-import { model } from "../agent.js";
-import { SYSTEM_PROMPT } from "../prompts.js";
+import { createAgentGraph, model } from "../agent.js";
 import {
   globalTopKQueryArxivPaperDocs,
   namespaceTopKQueryArxivPaperDocs,
@@ -90,11 +88,12 @@ async function evaluateAssignment(params: {
 }
 
 function createEvalAgent(queryTool: QueryArxivPaperDocsTool) {
-  return createAgent({
-    model,
-    tools: [calculator, downloadArxivPaper, resolveArxivPaper, queryTool],
-    systemPrompt: SYSTEM_PROMPT,
-  });
+  return createAgentGraph([
+    calculator,
+    downloadArxivPaper,
+    resolveArxivPaper,
+    queryTool,
+  ]);
 }
 
 function scoreLabel(score: boolean | null) {
@@ -134,17 +133,6 @@ function printAblationMatrix(results: AblationResult[], evalCases: EvalCase[]) {
 
   console.log("\nAblation comparison matrix");
   console.table(rows);
-
-  console.log("Ablation summary");
-  console.table(
-    results.map((result) => ({
-      ablation: result.name,
-      passed: result.passed,
-      total: result.total,
-      accuracy: result.total === 0 ? "0.00" : (result.passed / result.total).toFixed(2),
-      langsmith: result.langsmithUrl,
-    })),
-  );
 }
 
 const data = await readFile(DATASET_PATH, "utf8");
