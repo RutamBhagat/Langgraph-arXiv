@@ -40,7 +40,7 @@ Right now that list contains:
 
 So the model can do math, index papers, find papers, and retrieve chunks from a paper.
 
-## The Agent Loop
+## Agent Loop
 
 The actual agent is created with:
 
@@ -60,15 +60,15 @@ We are not manually building graph nodes and edges here. `createAgent` gives us 
 4. The model reads the observation.
 5. The model either calls another tool or answers the user.
 
-## System Prompt
+## Prompt Contract
 
 The prompt comes from `apps/server/src/prompts.ts`.
 
-It tells the agent the how to use the tools:
+It tells the agent how to choose between the tools:
 
 - Resolve a paper before querying its chunks.
 - Query paper docs only after it has a valid `paperId`.
-- Download only when the user explicitly asks to fetch or indexation.
+- Download only when the user explicitly asks to fetch or index.
 - Ask for clarification when the paper request is ambiguous.
 - Use the calculator for math.
 - Refuse grounded-answer requests when it cannot find relevant papers.

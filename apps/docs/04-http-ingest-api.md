@@ -38,9 +38,9 @@ For each row, it posts this body to:
 http://localhost:2024/tools/download-arxiv-paper
 ```
 
-The script stops if any request fails. It also sleeps three seconds between requests because the arXiv api has rate limits.
+The script stops if any request fails. It also sleeps three seconds between requests because the arXiv API has rate limits.
 
-## How LangGraph Exposes It
+## LangGraph Config
 
 `apps/server/langgraph.json` has this section:
 
@@ -52,7 +52,7 @@ The script stops if any request fails. It also sleeps three seconds between requ
 }
 ```
 
-That tells the LangGraph server to import the Hono app and serve it with the graph API.
+That tells the LangGraph server to import the Hono app and serve it beside the graph API.
 
 ## What To Pay Attention To
 

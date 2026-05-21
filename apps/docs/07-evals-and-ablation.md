@@ -6,7 +6,7 @@ Here we check the agent against a fixed set of examples.
 
 ## `eval.json`
 
-`eval.json` as the assignment rubric in data form.
+`eval.json` is the assignment rubric in data form.
 
 Each case has:
 
@@ -28,7 +28,7 @@ The cases cover paper Q&A, ambiguous paper names, medical refusal behavior, and 
 
 This is the script that sends those cases to LangSmith and compares retrieval variants.
 
-The script uses the same tools as the real agent. The only thing it swaps is the implementation of the `query_arxiv_paper_docs` tool, each uses a different retrieval strategy (more on that later).
+The script uses the same tools as the real agent. The only thing it swaps is the implementation of the `query_arxiv_paper_docs` tool, so each run uses a different retrieval strategy.
 
 The script does this:
 

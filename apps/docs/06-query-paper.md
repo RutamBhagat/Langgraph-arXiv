@@ -4,15 +4,11 @@ Source file: `apps/server/src/tools/queryArxivPaperDocs.ts`
 
 Tool name: `query_arxiv_paper_docs`
 
-This is the retrieval tool. By the time the agent calls this, it should already know which paper we need.
-
-So the sequence is important:
-
-1. Download/index the paper if needed.
-2. Resolve the paper with `resolve_arxiv_paper`.
-3. Query that paper with `query_arxiv_paper_docs`.
+This is the retrieval tool. It expects a specific `paperId`.
 
 This tool searches inside one paper only. It does not choose between papers.
+
+It takes a `paperId` and retrieves the chunks that look relevant to the question.
 
 ## What Input Looks Like
 
@@ -88,4 +84,4 @@ If nothing matches, it returns:
 
 This tool gives the agent additional context. It does not write the final answer.
 
-The final answer still depends on the agent reading these chunks and deciding if the context is enough, if not then it will ask another question.
+The final answer still depends on the agent reading these chunks and deciding whether the context is enough.

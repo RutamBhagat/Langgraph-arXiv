@@ -8,6 +8,8 @@ This is the lookup tool. Once papers are already indexed, this tool helps the ag
 
 If the paper is not already in the `papers` table, this tool cannot find it.
 
+So this step is only about turning a title, arXiv ID, or short paper description into a `paperId`. It does not index papers or search inside their chunks.
+
 ## What Input Looks Like
 
 ```json
@@ -59,4 +61,4 @@ If there are no indexed papers, it returns:
 
 The main output is `paperId`.
 
-The agent should take that `paperId` and pass it into `query_arxiv_paper_docs`
+The agent should take that `paperId` and pass it into `query_arxiv_paper_docs`.

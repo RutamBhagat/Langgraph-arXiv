@@ -11,9 +11,20 @@ This is how everything connects.
 
 The project has one chat agent graph, one small HTTP endpoint, and LangSmith to trace and evaluate the runs.
 
+The main pieces are:
+
+- `01-agent.md`: model selection, tools, prompt contract, and agent export.
+- `02-download-arxiv-paper.md`: one-paper ingest internals.
+- `04-http-ingest-api.md`: batch ingest route and script.
+- `05-find-paper.md`: paper-level lookup.
+- `06-query-paper.md`: chunk retrieval inside one paper.
+- `07-evals-and-ablation.md`: LangSmith eval runs and retrieval comparisons.
+
 ## What `langgraph.json` Does
 
-It exposes the agent graph:
+`apps/server/langgraph.json` exposes two entry points.
+
+The graph entry point imports the chat agent:
 
 ```json
 {
@@ -23,9 +34,7 @@ It exposes the agent graph:
 }
 ```
 
-That tells LangGraph where to import the runnable agent from.
-
-It also exposes the HTTP app:
+The HTTP entry point imports the Hono app:
 
 ```json
 {
@@ -35,24 +44,32 @@ It also exposes the HTTP app:
 }
 ```
 
-So there are two entry points:
+Studio and graph API traffic use the graph entry point. Batch ingest uses the HTTP entry point.
 
-- The graph entry point for chat and Studio.
-- The HTTP entry point for raw paper ingestion.
+## Runtime Paths
 
-LangGraph Studio reads the graph config and loads the `agent`.
+For chat:
 
-When you send a message in Studio, Studio is running that graph.
+1. LangGraph loads `agent` from `apps/server/src/agent.ts`.
+2. The user sends a message through Studio or the graph API.
+3. The agent chooses tools as needed.
+4. The final assistant message is returned.
 
-Because the graph is built with `createAgent`, the flow is simple:
+For batch ingest:
 
-1. User message goes in.
-2. Model decides what to do.
-3. Tool calls run when needed.
-4. Tool observations come back.
-5. Model continues or returns the final answer.
+1. `apps/server/.ingest/raw/ingest.sh` reads arXiv IDs from `metadata.json`.
+2. The script posts each ID to `/tools/download-arxiv-paper`.
+3. The HTTP route invokes the same download tool available to the agent.
+4. Paper metadata, summary embeddings, chunks, and chunk embeddings are stored.
 
-In Studio, you can see model calls, tool calls, and the messages passed between them.
+For evals:
+
+1. `apps/server/src/evals/runEval.ts` reads examples from `eval.json`.
+2. It runs the real agent shape against those examples.
+3. It swaps only the retrieval tool implementation for ablation runs.
+4. It records the runs and judge feedback in LangSmith.
+
+## LangSmith
 
 LangSmith is the observability layer.
 
@@ -66,53 +83,8 @@ When tracing environment variables are present, LangSmith records the run. For t
 - Timing.
 - Metadata.
 
-In `agent.ts`, the model is configured with:
-
-- `ls_provider`
-- `ls_model_name`
-
-Those metadata fields help LangSmith label the run with the correct provider and model.
-
-## Token Usage and Cost
+Studio is useful for stepping through a single graph run. LangSmith is useful for comparing traces across runs and eval experiments.
 
 Token usage comes from the model response metadata. Providers usually return input tokens, output tokens, and total tokens.
 
 LangSmith can use that usage metadata plus provider/model information to show token counts and estimated cost.
-
-`apps/server/src/evals/runEval.ts` runs the agent against fixed examples from `eval.json`.
-
-It creates a LangSmith dataset named `eval`, inserts the examples, runs the real agent, and saves results under the experiment prefix `skyclad-agent`.
-
-Then it grades each answer with an LLM-as-judge evaluator from `openevals`.
-
-The judge checks the question, the agent answer, the expected behavior, the reference answer, and the grading notes.
-
-The feedback key is:
-
-```text
-assignment_score
-```
-
-## End-to-End
-
-The normal flow from ingest to evaluation:
-
-First, `.ingest/raw/ingest.sh` reads arXiv IDs from `metadata.json`.
-
-Then it posts each ID to the HTTP route:
-
-```text
-/tools/download-arxiv-paper
-```
-
-That route invokes the same `download_arxiv_paper` tool the agent can use.
-
-The tool stores paper metadata, summary embeddings, document chunks, and chunk embeddings.
-
-Later, the user can ask the agent a question in Studio or through the graph API.
-
-The agent resolves the paper, retrieves chunks from that paper, and answers from the retrieved evidence.
-
-LangSmith traces the run so we can inspect what happened.
-
-The eval script can replay fixed examples and use an LLM judge to score if the behavior was correct.

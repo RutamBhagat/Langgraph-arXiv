@@ -57,4 +57,3 @@ For a new paper, expect something like:
 If the paper already exists, the status is `skipped_existing`.
 
 If arXiv does not return a document, the status is `not_found`.
-
