@@ -63,12 +63,14 @@ This keeps the implementation small enough to audit while making the actual grap
 
 The server supports two model paths:
 
-- OpenAI-compatible proxy path: `OPENAI_PROXY_BASE_URL` uses `gpt-5.5`.
+- OpenAI-compatible proxy path: `OPENAI_PROXY_BASE_URL` uses `gpt-5.4-mini`.
 - Google path: `GOOGLE_API_KEY` uses `gemini-3.1-flash-lite-preview`.
 
 The proxy path exists so the project can be run through a local OpenAI-compatible OAuth proxy during development. The Google path is the simple API-key path for hosted or local runs. If neither provider is configured, startup fails.
 
 ### Corpus and Ingestion
+
+The corpus is an equivalent technical-paper corpus of 50 famous and foundational arXiv papers rather than a last-90-days cs.AI scrape. I chose this because these papers are well-known enough to support meaningful hand-written evals, cover the core ideas behind modern LLM and agent systems, and make retrieval failures easier to inspect than a random recent-paper sample.
 
 The ingest path uses LangChain's arXiv retriever with `getFullDocuments: true`. it gets metadata and paper text through langchains maintained integration and avoids a custom PDF or TeX extraction system.
 

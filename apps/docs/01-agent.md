@@ -8,7 +8,7 @@ This is where we choose the chat model, attach the tools, and export the explici
 
 The first thing the file does is choose a model from environment variables.
 
-If `OPENAI_PROXY_BASE_URL` exists, we use `ChatOpenAI` with `gpt-5.5`.
+If `OPENAI_PROXY_BASE_URL` exists, we use `ChatOpenAI` with `gpt-5.4-mini`.
 
 If that is not configured, but `GOOGLE_API_KEY` exists, we use `ChatGoogle` with `gemini-3.1-flash-lite-preview`.
 

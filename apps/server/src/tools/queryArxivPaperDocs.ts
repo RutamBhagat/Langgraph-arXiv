@@ -118,7 +118,7 @@ export const queryArxivPaperDocs = tool(
       lexicalQuery: z
         .string()
         .describe(
-          "Agent-authored PostgreSQL websearch lexical query for exact recall. Pass an empty string when no useful exact terms are known.",
+          "Agent-authored PostgreSQL websearch lexical query for exact recall. Use OR between alternative terms when any one of the terms may be relevant, and use quoted phrases only for words that must appear together. Pass an empty string when no useful exact terms are known.",
         ),
     }),
   },
