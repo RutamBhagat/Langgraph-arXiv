@@ -4,11 +4,11 @@ Source file: `apps/server/src/tools/resolveArxivPaper.ts`
 
 Tool name: `resolve_arxiv_paper`
 
-This is the lookup tool. Once papers are already indexed, this tool helps the agent figure out which paper the user is talking about.
+This is the lookup tool. Once papers are already indexed, this tool returns candidate papers that may match what the user is talking about.
 
 If the paper is not already in the `papers` table, this tool cannot find it.
 
-So this step is only about turning a title, arXiv ID, or short paper description into a `paperId`. It does not index papers or search inside their chunks.
+So this step is only about finding likely matches for a title, arXiv ID, or short paper description. It does not prove the requested paper exists, index papers, or search inside their chunks.
 
 ## What Input Looks Like
 
@@ -32,13 +32,15 @@ That `summaryEmbedding` was created by the download tool from the paper title, a
 
 The database query ranks rows by cosine similarity and returns the top three candidates.
 
+The agent must compare those candidates against the user's requested title, acronym, or arXiv ID before using a `paperId`. If none of the candidates clearly match a named paper, the agent should say the paper is not available in the indexed corpus instead of querying a different paper.
+
 ## Return Values
 
-When it finds matches, the shape is:
+When it finds candidates, the shape is:
 
 ```json
 {
-  "status": "resolved",
+  "status": "candidates",
   "candidates": [
     {
       "paperId": "1706.03762",
@@ -59,6 +61,6 @@ If there are no indexed papers, it returns:
 
 ## What To Pay Attention To
 
-The main output is `paperId`.
+The main output is a ranked candidate list.
 
-The agent should take that `paperId` and pass it into `query_arxiv_paper_docs`.
+The agent should pass a `paperId` into `query_arxiv_paper_docs` only after the candidate clearly matches the paper the user asked about.

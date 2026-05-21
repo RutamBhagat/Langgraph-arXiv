@@ -23,7 +23,7 @@ export const resolveArxivPaper = tool(
         return { status: "not_found" };
       }
 
-      return { status: "resolved", candidates };
+      return { status: "candidates", candidates };
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       return `Error resolving arXiv paper: ${message}`;
@@ -32,7 +32,7 @@ export const resolveArxivPaper = tool(
   {
     name: "resolve_arxiv_paper",
     description:
-      "Resolve a paper title, arXiv ID, or bibliographic identifier to the single most relevant ingested arXiv paper and return its paperId handle. Prefer exact paper titles or IDs over topical descriptions. If the user explicitly names a paper, pass only that paper title or arXiv ID, not the full substantive question. Include broader topical query text only when no title or identifier is available.",
+      "Find candidate ingested arXiv papers for a paper title, arXiv ID, or bibliographic identifier. The returned candidates are nearest neighbors, not proof that the requested paper exists in the corpus. If the user explicitly names a paper, pass only that paper title or arXiv ID, not the full substantive question. Include broader topical query text only when no title or identifier is available.",
     schema: z.object({
       query: z
         .string()
