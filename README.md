@@ -122,7 +122,7 @@ The variants all use the same graph loop and expose the same `query_arxiv_paper_
 
 The ablation-only tools are in `apps/server/src/tools/ablation/queryArxivPaperDocs.ts`, the production hybrid tool is in `apps/server/src/tools/queryArxivPaperDocs.ts`.
 
-At the end, the script prints a per-case comparison matrix plus a summary table with pass counts, accuracy, and LangSmith project links for each variant. The durable eval results live in the linked LangSmith experiment dashboards, including the agent traces, judge scores, feedback, timing, token usage, and provider metadata.
+During the run, LangSmith prints experiment links for each variant. At the end, the script prints a per-case comparison matrix. The durable eval results live in the linked LangSmith experiment dashboards, including the agent traces, judge scores, feedback, timing, token usage, and provider metadata.
 
 Run it with:
 
