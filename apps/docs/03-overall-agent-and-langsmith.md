@@ -7,15 +7,13 @@ Source files:
 - `apps/server/src/api/app.ts`
 - `apps/server/src/evals/runEval.ts`
 
-This is the high-level picture of how everything connects.
+This is how everything connects.
 
-If you only remember one thing, remember this: the project has one chat agent graph, one small HTTP ingest app, and LangSmith sits around the runs to trace and evaluate them.
+The project has one chat agent graph, one small HTTP endpoint, and LangSmith to trace and evaluate the runs.
 
 ## What `langgraph.json` Does
 
-Start with `apps/server/langgraph.json`.
-
-It exposes the agent graph like this:
+It exposes the agent graph:
 
 ```json
 {
@@ -27,7 +25,7 @@ It exposes the agent graph like this:
 
 That tells LangGraph where to import the runnable agent from.
 
-It also exposes the HTTP app like this:
+It also exposes the HTTP app:
 
 ```json
 {
@@ -42,9 +40,7 @@ So there are two entry points:
 - The graph entry point for chat and Studio.
 - The HTTP entry point for raw paper ingestion.
 
-## How LangGraph Studio Fits In
-
-LangGraph Studio reads the graph config and loads the `agent` export from `apps/server/src/agent.ts`.
+LangGraph Studio reads the graph config and loads the `agent`.
 
 When you send a message in Studio, Studio is running that graph.
 
@@ -56,13 +52,11 @@ Because the graph is built with `createAgent`, the flow is simple:
 4. Tool observations come back.
 5. Model continues or returns the final answer.
 
-Studio is useful because you can watch that loop happen. You can see model calls, tool calls, and the messages passed between them.
-
-## How LangSmith Tracing Fits In
+In Studio, you can see model calls, tool calls, and the messages passed between them.
 
 LangSmith is the observability layer.
 
-When tracing environment variables are configured, LangSmith records the run. For this project, that means it can show:
+When tracing environment variables are present, LangSmith records the run. For this project, it shows:
 
 - User input.
 - Model calls.
@@ -85,10 +79,6 @@ Token usage comes from the model response metadata. Providers usually return inp
 
 LangSmith can use that usage metadata plus provider/model information to show token counts and estimated cost.
 
-That is why the `ls_provider` and `ls_model_name` metadata are useful. They help LangSmith understand which pricing/model label applies to the traced run.
-
-## How Evals Fit In
-
 `apps/server/src/evals/runEval.ts` runs the agent against fixed examples from `eval.json`.
 
 It creates a LangSmith dataset named `eval`, inserts the examples, runs the real agent, and saves results under the experiment prefix `skyclad-agent`.
@@ -103,11 +93,9 @@ The feedback key is:
 assignment_score
 ```
 
-So in LangSmith, that is the score field to look at for these evals.
+## End-to-End
 
-## End-to-End Story
-
-Here is the normal flow from ingest to evaluation.
+The normal flow from ingest to evaluation:
 
 First, `.ingest/raw/ingest.sh` reads arXiv IDs from `metadata.json`.
 
@@ -121,10 +109,10 @@ That route invokes the same `download_arxiv_paper` tool the agent can use.
 
 The tool stores paper metadata, summary embeddings, document chunks, and chunk embeddings.
 
-Later, the user asks the agent a question in Studio or through the graph API.
+Later, the user can ask the agent a question in Studio or through the graph API.
 
 The agent resolves the paper, retrieves chunks from that paper, and answers from the retrieved evidence.
 
 LangSmith traces the run so we can inspect what happened.
 
-The eval script can replay fixed examples and use an LLM judge to score whether the behavior was correct.
+The eval script can replay fixed examples and use an LLM judge to score if the behavior was correct.

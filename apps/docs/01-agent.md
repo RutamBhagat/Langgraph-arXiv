@@ -2,19 +2,17 @@
 
 Source file: `apps/server/src/agent.ts`
 
-This file is intentionally small.
-
-If you are new to the project, read this file as the place where we choose the chat model, attach the tools, and export the agent that LangGraph runs.
+This is where we choose the chat model, attach the tools, and export the agent that LangGraph runs.
 
 ## Model Setup
 
 The first thing the file does is choose a model from environment variables.
 
-If `OPENAI_PROXY_BASE_URL` exists, we use `ChatOpenAI` with `gpt-5.4-mini`.
+If `OPENAI_PROXY_BASE_URL` exists, we use `ChatOpenAI` with `gpt-5.4-mini` or `gpt-5.5`.
 
-If that is not configured, but `GOOGLE_API_KEY` exists, we use `ChatGoogle` with `gemini-3.1-flash-lite-preview`.
+If that is not configured, but `GOOGLE_API_KEY` exists, we use `ChatGoogle` with `gemini-3.1-flash-lite-preview` or `gemini-2.5-flash-lite`.
 
-If neither path is configured, the file throws during startup. That is intentional because the agent cannot run without a model provider.
+If neither path is configured, the file throws during startup.
 
 ## LangSmith Metadata
 
@@ -23,7 +21,7 @@ The model config includes LangSmith metadata:
 - `ls_provider`
 - `ls_model_name`
 
-This helps LangSmith label traces correctly, especially when the OpenAI path is going through a proxy.
+This helps LangSmith label traces correctly.
 
 ## Tool Setup
 
@@ -54,8 +52,6 @@ createAgent({
 });
 ```
 
-That is the main idea of this file.
-
 We are not manually building graph nodes and edges here. `createAgent` gives us the standard ReAct-style loop:
 
 1. The model reads the user message and system prompt.
@@ -68,14 +64,14 @@ We are not manually building graph nodes and edges here. `createAgent` gives us 
 
 The prompt comes from `apps/server/src/prompts.ts`.
 
-It tells the agent the policy for tool use:
+It tells the agent the how to use the tools:
 
 - Resolve a paper before querying its chunks.
 - Query paper docs only after it has a valid `paperId`.
-- Download only when the user explicitly asks to fetch or index.
+- Download only when the user explicitly asks to fetch or indexation.
 - Ask for clarification when the paper request is ambiguous.
 - Use the calculator for math.
-- Refuse grounded-answer requests when it cannot find relevant paper evidence.
+- Refuse grounded-answer requests when it cannot find relevant papers.
 
 ## Exports
 

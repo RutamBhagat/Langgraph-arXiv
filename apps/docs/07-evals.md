@@ -2,17 +2,11 @@
 
 Source folder: `apps/server/src/evals`
 
-This folder is where we check whether the agent behaves correctly on a fixed set of examples.
-
-There are three paths to know:
-
-- `eval.json`
-- `runEval.ts`
-- `../tools/ablation/queryArxivPaperDocs.ts`
+Here we check the agent against a fixed set of examples.
 
 ## `eval.json`
 
-Think of `eval.json` as the assignment rubric in data form.
+`eval.json` as the assignment rubric in data form.
 
 Each case has:
 
@@ -22,25 +16,25 @@ Each case has:
 - `reference_answer`
 - `grading_notes`
 
-`expected_behavior` is one of three values:
+`expected_behavior` can be either:
 
 - `answer`: the agent should answer.
 - `clarify`: the agent should ask a clarification question.
 - `refuse`: the agent should avoid answering directly.
 
-The cases cover paper QA, ambiguous paper names, medical refusal behavior, and calculator use.
+The cases cover paper Q&A, ambiguous paper names, medical refusal behavior, and calculator use.
 
 ## `runEval.ts`
 
 This is the script that sends those cases to LangSmith and compares retrieval variants.
 
-The script uses the same model, system prompt, and non-retrieval tools as the real agent. The only thing it swaps is the implementation behind the `query_arxiv_paper_docs` tool name.
+The script uses the same tools as the real agent. The only thing it swaps is the implementation of the `query_arxiv_paper_docs` tool, each uses a different retrieval strategy (more on that later).
 
 The script does this:
 
 1. Read `eval.json`.
 2. Connect to LangSmith with `new Client()`.
-3. Delete the existing dataset named `eval` if it exists.
+3. Delete the existing dataset named `eval` if it exists. (This was required to make edits to the eval.json file and have them reflect in the dataset)
 4. Recreate the dataset.
 5. Insert each JSON case as a LangSmith example.
 6. Build three eval agents that differ only in retrieval.
@@ -61,7 +55,7 @@ All three variants expose the same LangChain tool name:
 name: "query_arxiv_paper_docs"
 ```
 
-That keeps the agent interface fixed while changing only the retrieval technique underneath.
+That keeps the same agent and only changes the retrieval technique.
 
 ## Ablation Tools
 
@@ -71,12 +65,12 @@ The ablation-only retrieval tools live in:
 apps/server/src/tools/ablation/queryArxivPaperDocs.ts
 ```
 
-That file exports direct tool constants, not factories:
+That file exports these tools:
 
 - `globalTopKQueryArxivPaperDocs`
 - `namespaceTopKQueryArxivPaperDocs`
 
-The production hybrid tool remains in:
+The production tool remains in:
 
 ```text
 apps/server/src/tools/queryArxivPaperDocs.ts
@@ -86,7 +80,7 @@ apps/server/src/tools/queryArxivPaperDocs.ts
 
 ## The Judge
 
-The judge is created with `createLLMAsJudge` from `openevals`.
+The judge is created using `openevals`.
 
 The prompt tells the judge to return JSON with:
 
@@ -101,17 +95,9 @@ The feedback key is `assignment_score`, so that is the score name you see in Lan
 
 ## What To Pay Attention To
 
-These evals are not unit tests.
-
-They are LangSmith experiments. They run real agent loops, record traces, and then use another model call to judge whether each answer matched the expected behavior.
-
-The experiment prefixes are:
-
-- `skyclad-agent-namespace-top-k-lexical-rrf`
-- `skyclad-agent-namespace-top-k`
-- `skyclad-agent-global-top-k`
+These are LangSmith experiments. They run real agent loops, record traces, and then use another model call to judge if each answer matched the expected behavior.
 
 At the end, the script prints:
 
 - an ablation comparison matrix by eval case;
-- a summary table with passed count, total count, accuracy, and LangSmith URL.
+- a summary table with passed count, total count, accuracy, and LangSmith URL

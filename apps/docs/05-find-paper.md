@@ -6,7 +6,7 @@ Tool name: `resolve_arxiv_paper`
 
 This is the lookup tool. Once papers are already indexed, this tool helps the agent figure out which paper the user is talking about.
 
-It does not download anything. If the paper is not already in the `papers` table, this tool cannot find it.
+If the paper is not already in the `papers` table, this tool cannot find it.
 
 ## What Input Looks Like
 
@@ -18,7 +18,7 @@ It does not download anything. If the paper is not already in the `papers` table
 
 The input is just one non-empty string.
 
-In the prompt, we tell the agent to pass a clean title or arXiv ID when the user gives one. So if the user says "According to Attention Is All You Need...", the agent should search for `Attention Is All You Need`, not the whole question.
+In the prompt, we tell the agent to pass a clean title or arXiv ID when the user gives one. So if the user says "According to Attention Is All You Need...", the agent should search for `Attention Is All You Need`, not the entire question.
 
 ## Walkthrough
 
@@ -59,4 +59,4 @@ If there are no indexed papers, it returns:
 
 The main output is `paperId`.
 
-The agent should take that `paperId` and pass it into `query_arxiv_paper_docs`. Do not treat this tool as the answer source. It only identifies the paper.
+The agent should take that `paperId` and pass it into `query_arxiv_paper_docs`

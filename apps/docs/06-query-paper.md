@@ -4,7 +4,7 @@ Source file: `apps/server/src/tools/queryArxivPaperDocs.ts`
 
 Tool name: `query_arxiv_paper_docs`
 
-This is the evidence retrieval tool. By the time the agent calls this, it should already know which paper we mean.
+This is the retrieval tool. By the time the agent calls this, it should already know which paper we need.
 
 So the sequence is important:
 
@@ -20,7 +20,7 @@ This tool searches inside one paper only. It does not choose between papers.
 {
   "paperId": "1706.03762",
   "question": "What problem does self-attention solve?",
-  "lexicalQuery": "self-attention recurrent sequential"
+  "lexicalQuery": "self-attention OR recurrent OR sequential"
 }
 ```
 
@@ -36,7 +36,7 @@ First, the tool embeds the question.
 
 Then it runs vector search against `paperDocuments.embedding`, but only for rows with the selected `paperId`.
 
-After that, it optionally runs PostgreSQL full-text search against `paperDocuments.pageContentSearch`. This only happens when `lexicalQuery` is not empty.
+After that, it optionally runs PostgreSQL full-text search against `paperDocuments.pageContentSearch`. This only happens if `lexicalQuery` is not empty.
 
 So we have two rankings:
 
@@ -45,7 +45,7 @@ So we have two rankings:
 
 The tool merges those rankings with reciprocal rank fusion. That gives one combined ranking that can reward chunks found by either search method.
 
-Finally, it keeps the top three chunk IDs, fetches the chunk text, and returns the chunks in ranked order.
+Finally, it keeps the top three chunks and returns them in ranked order.
 
 ## Current Retrieval Settings
 
@@ -69,7 +69,8 @@ When retrieval works, the tool returns:
       "paperId": "1706.03762",
       "chunkIndex": 4,
       "pageContent": "Relevant paper text..."
-    }
+    },
+    ...
   ]
 }
 ```
@@ -85,6 +86,6 @@ If nothing matches, it returns:
 
 ## What To Pay Attention To
 
-This tool gives the agent evidence. It does not write the final answer.
+This tool gives the agent additional context. It does not write the final answer.
 
-The final answer still depends on the model reading these chunks and deciding whether the evidence is enough.
+The final answer still depends on the agent reading these chunks and deciding if the context is enough, if not then it will ask another question.
