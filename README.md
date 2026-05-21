@@ -2,7 +2,7 @@
 
 This is a LangGraph-based agentic RAG system for asking questions about indexed arXiv papers.
 
-This document explains what was built, why the major choices were made, and where the project boundaries are. The detailed local runbook lives in [apps/docs/00-setup.md](apps/docs/00-setup.md).
+Let me explain what was built, why the major choices were made, and where the project boundaries are. The detailed local runbook lives in [apps/docs/00-setup.md](apps/docs/00-setup.md).
 
 For setup, start there:
 
