@@ -24,7 +24,7 @@ The main pieces are:
 
 `apps/server/langgraph.json` exposes two entry points.
 
-The graph entry point imports the chat agent:
+The graph entry point imports the compiled chat graph:
 
 ```json
 {
@@ -52,8 +52,10 @@ For chat:
 
 1. LangGraph loads `agent` from `apps/server/src/agent.ts`.
 2. The user sends a message through Studio or the graph API.
-3. The agent chooses tools as needed.
-4. The final assistant message is returned.
+3. The `agent` node calls the chat model with the system prompt and message state.
+4. If the assistant message contains tool calls, the graph routes to `tools`.
+5. `ToolNode` executes the tools and sends observations back to `agent`.
+6. When the assistant message has no tool calls, the final assistant message is returned.
 
 For batch ingest:
 
@@ -65,7 +67,7 @@ For batch ingest:
 For evals:
 
 1. `apps/server/src/evals/runEval.ts` reads examples from `eval.json`.
-2. It runs the real agent shape against those examples.
+2. It runs the same model, prompt, and tool set against those examples.
 3. It swaps only the retrieval tool implementation for ablation runs.
 4. It records the runs and judge feedback in LangSmith.
 

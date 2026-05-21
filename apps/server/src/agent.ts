@@ -1,11 +1,29 @@
-import { createAgent } from "langchain";
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatGoogle } from "@langchain/google";
+import { SystemMessage } from "@langchain/core/messages";
+import {
+  END,
+  START,
+  MessagesAnnotation,
+  StateGraph,
+} from "@langchain/langgraph";
+import { ToolNode } from "@langchain/langgraph/prebuilt";
+
 import { TOOLS } from "./tools/index.js";
 import { SYSTEM_PROMPT } from "./prompts.js";
 import { env } from "@skyclad_langgraph/env/server";
 
-export const model = env.OPENAI_PROXY_BASE_URL
+const metadata = env.OPENAI_PROXY_BASE_URL
+  ? {
+      ls_provider: "openai",
+      ls_model_name: "gpt-5.5",
+    }
+  : {
+      ls_provider: "google",
+      ls_model_name: "gemini-3.1-flash-lite-preview",
+    };
+
+const baseModel = env.OPENAI_PROXY_BASE_URL
   ? new ChatOpenAI({
       model: "gpt-5.5",
       configuration: {
@@ -13,22 +31,11 @@ export const model = env.OPENAI_PROXY_BASE_URL
       },
       // OpenAI SDK requires an apiKey value even when a local OpenAI-compatible proxy
       apiKey: env.OPENAI_API_KEY ?? "not-needed",
-      metadata: {
-        ls_provider: "openai",
-        ls_model_name: "gpt-5.5",
-      },
     })
   : env.GOOGLE_API_KEY
     ? new ChatGoogle({
         model: "gemini-3.1-flash-lite-preview",
-        // model: "gemini-2.5-flash-lite",
         apiKey: env.GOOGLE_API_KEY,
-      }).withConfig({
-        metadata: {
-          ls_provider: "google",
-          ls_model_name: "gemini-3.1-flash-lite-preview",
-          // ls_model_name: "gemini-2.5-flash-lite",
-        },
       })
     : (() => {
         throw new Error(
@@ -36,8 +43,40 @@ export const model = env.OPENAI_PROXY_BASE_URL
         );
       })();
 
-export const agent = createAgent({
-  model,
-  tools: TOOLS,
-  systemPrompt: SYSTEM_PROMPT,
-});
+export const model = baseModel.withConfig({ metadata });
+
+const modelWithTools = baseModel.bindTools(TOOLS).withConfig({ metadata });
+
+const callModel = async (state: typeof MessagesAnnotation.State) => {
+  const response = await modelWithTools.invoke([
+    new SystemMessage(SYSTEM_PROMPT),
+    ...state.messages,
+  ]);
+
+  return {
+    messages: [response],
+  };
+};
+
+const shouldContinue = (state: typeof MessagesAnnotation.State) => {
+  const lastMessage = state.messages.at(-1);
+
+  if (
+    lastMessage &&
+    "tool_calls" in lastMessage &&
+    Array.isArray(lastMessage.tool_calls) &&
+    lastMessage.tool_calls.length > 0
+  ) {
+    return "tools";
+  }
+
+  return END;
+};
+
+export const agent = new StateGraph(MessagesAnnotation)
+  .addNode("agent", callModel)
+  .addNode("tools", new ToolNode(TOOLS))
+  .addEdge(START, "agent")
+  .addConditionalEdges("agent", shouldContinue)
+  .addEdge("tools", "agent")
+  .compile();

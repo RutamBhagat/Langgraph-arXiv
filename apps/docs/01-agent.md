@@ -2,15 +2,15 @@
 
 Source file: `apps/server/src/agent.ts`
 
-This is where we choose the chat model, attach the tools, and export the agent that LangGraph runs.
+This is where we choose the chat model, attach the tools, and export the explicit graph that LangGraph runs.
 
 ## Model Setup
 
 The first thing the file does is choose a model from environment variables.
 
-If `OPENAI_PROXY_BASE_URL` exists, we use `ChatOpenAI` with `gpt-5.4-mini` or `gpt-5.5`.
+If `OPENAI_PROXY_BASE_URL` exists, we use `ChatOpenAI` with `gpt-5.5`.
 
-If that is not configured, but `GOOGLE_API_KEY` exists, we use `ChatGoogle` with `gemini-3.1-flash-lite-preview` or `gemini-2.5-flash-lite`.
+If that is not configured, but `GOOGLE_API_KEY` exists, we use `ChatGoogle` with `gemini-3.1-flash-lite-preview`.
 
 If neither path is configured, the file throws during startup.
 
@@ -42,23 +42,26 @@ So the model can do math, index papers, find papers, and retrieve chunks from a 
 
 ## Agent Loop
 
-The actual agent is created with:
+The actual graph is created with:
 
 ```ts
-createAgent({
-  model,
-  tools: TOOLS,
-  systemPrompt: SYSTEM_PROMPT,
-});
+new StateGraph(MessagesAnnotation)
+  .addNode("agent", callModel)
+  .addNode("tools", new ToolNode(TOOLS))
+  .addEdge(START, "agent")
+  .addConditionalEdges("agent", shouldContinue)
+  .addEdge("tools", "agent")
+  .compile();
 ```
 
-We are not manually building graph nodes and edges here. `createAgent` gives us the standard ReAct-style loop:
+The graph uses a direct ReAct-style loop:
 
-1. The model reads the user message and system prompt.
-2. The model decides whether to call a tool.
-3. The tool runs and returns an observation.
-4. The model reads the observation.
-5. The model either calls another tool or answers the user.
+1. `agent` calls the tool-bound chat model with the system prompt and current message state.
+2. `shouldContinue` checks the last assistant message for tool calls.
+3. If there are tool calls, the graph routes to `tools`.
+4. `ToolNode` runs the requested tools and appends tool observations.
+5. The graph returns to `agent`.
+6. If there are no tool calls, the graph ends.
 
 ## Prompt Contract
 

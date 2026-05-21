@@ -1,4 +1,4 @@
-prerequisites
+Prerequisites
 - pnpm
 - google api key
 - langsmith api key
@@ -36,7 +36,7 @@ ollama ps
 EMBEDDINGS_MODEL=qwen3-embedding:8b
 ```
 
-6. Local Openai Oauth Reverse Proxy Setup (optional)
+6. Local OpenAI OAuth reverse proxy setup (optional)
 ```bash
 bunx @openai/codex login
 # Login the browser
@@ -50,7 +50,7 @@ OPENAI_PROXY_BASE_URL=http://127.0.0.1:10531/v1
 # NOTE: you will not be able to track usage costs in evals if you use the proxy instead of api key
 ```
 
-If you do not want the local setup then GOOGLE_API_KEY is enough (free tier has rate limits for embeddings, api calls and evals)
+If you do not want the local setup then `GOOGLE_API_KEY` is enough. The free tier has rate limits for embeddings, API calls, and evals.
 
 7. Ingestion
 ```bash

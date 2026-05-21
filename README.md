@@ -53,18 +53,18 @@ This gives two levels of retrieval: first resolve the paper, then search only in
 
 ### Agent Framework
 
-I used LangChain `createAgent` running under LangGraph.
+I used an explicit LangGraph `StateGraph` instead of the higher-level LangChain agent helper.
 
-The core behavior is the agent decision loop around paper-grounded retrieval. `createAgent` runs the local tool loop over the tools defined in this repo: model call, tool call, tool observation, then another model call until no tool is needed. LangChain's `createAgent` is the standard agent interface with that model/tool/finish loop.
+The core behavior is the agent decision loop around paper-grounded retrieval. The graph has an `agent` node that calls the tool-bound chat model, a conditional edge that checks the last assistant message for tool calls, and a `tools` node that executes those calls through `ToolNode`. Tool observations flow back into the `agent` node until the model returns a normal assistant answer.
 
-This keeps the implementation small enough to audit while still showing real agent behavior with LangGraph Studio and LangSmith.
+This keeps the implementation small enough to audit while making the actual graph path visible in code and in LangGraph Studio.
 
 ### Model Selection
 
 The server supports two model paths:
 
-- OpenAI-compatible proxy path: `OPENAI_PROXY_BASE_URL` uses `gpt-5.5` / `gpt-5.4-mini`.
-- Google path: `GOOGLE_API_KEY` uses `gemini-3.1-flash-lite-preview` / `gemini-2.5-flash-lite`.
+- OpenAI-compatible proxy path: `OPENAI_PROXY_BASE_URL` uses `gpt-5.5`.
+- Google path: `GOOGLE_API_KEY` uses `gemini-3.1-flash-lite-preview`.
 
 The proxy path exists so the project can be run through a local OpenAI-compatible OAuth proxy during development. The Google path is the simple API-key path for hosted or local runs. If neither provider is configured, startup fails.
 
