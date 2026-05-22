@@ -7,12 +7,15 @@ import {
   START,
   MessagesAnnotation,
   StateGraph,
+  MemorySaver,
 } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 
 import { TOOLS } from "./tools/index.js";
 import { SYSTEM_PROMPT } from "./prompts.js";
 import { env } from "@skyclad_langgraph/env/server";
+
+const memory = new MemorySaver();
 
 const metadata = env.OPENAI_PROXY_BASE_URL
   ? {
@@ -83,7 +86,7 @@ export function createAgentGraph(tools: AgentTool[]) {
     .addEdge(START, "agent")
     .addConditionalEdges("agent", shouldContinue)
     .addEdge("tools", "agent")
-    .compile();
+    .compile({ checkpointer: memory });
 }
 
 export const agent = createAgentGraph(TOOLS);

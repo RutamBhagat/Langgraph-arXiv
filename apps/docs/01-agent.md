@@ -51,7 +51,7 @@ new StateGraph(MessagesAnnotation)
   .addEdge(START, "agent")
   .addConditionalEdges("agent", shouldContinue)
   .addEdge("tools", "agent")
-  .compile();
+  .compile({ checkpointer: memory });
 ```
 
 The graph uses a direct ReAct-style loop:
@@ -62,6 +62,8 @@ The graph uses a direct ReAct-style loop:
 4. `ToolNode` runs the requested tools and appends tool observations.
 5. The graph returns to `agent`.
 6. If there are no tool calls, the graph ends.
+
+`checkpointer: memory` uses LangGraph `MemorySaver`, so conversation state persists per `thread_id`.
 
 ## Prompt Contract
 

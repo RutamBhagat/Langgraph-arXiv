@@ -96,7 +96,9 @@ A reranker is useful when the first-stage retriever returns a noisy candidate se
 
 The useful memory for this project is conversation memory: the current message history in the LangGraph agent session. Follow-up questions can use the earlier paper mention, earlier clarification, and earlier tool observations.
 
-I did not add semantic user memory or episodic long-term user memory. This is a paper-grounded RAG system, not a personal assistant. Persisting user facts would not improve deterministic answers about indexed papers, and it would create extra retrieval, privacy, freshness, and evaluation problems.
+This is implemented with LangGraph `MemorySaver` wired as the graph `checkpointer`. Memory is thread-scoped: follow-up turns reuse prior context when the same `thread_id` is used.
+
+I did not add semantic user memory or episodic long-term user memory beyond the chat thread state. This is a paper-grounded RAG system, not a personal assistant. Persisting user facts would not improve deterministic answers about indexed papers, and it would create extra retrieval, privacy, freshness, and evaluation problems.
 
 The paper context itself is the semantic memory. The agent trace is captured through LangSmith.
 
