@@ -32,16 +32,11 @@ The script uses the same LangGraph agent factory as the real agent. The only thi
 
 The script does this:
 
-1. Read `eval.json`.
-2. Connect to LangSmith with `new Client()`.
-3. Delete the existing dataset named `eval` if it exists. (This was required to make edits to the eval.json file and have them reflect in the dataset)
-4. Recreate the dataset.
-5. Insert each JSON case as a LangSmith example.
-6. Build three eval graphs that differ only in retrieval.
-7. Run each agent against the full dataset.
-8. Take the last agent message as the answer.
-9. Grade that answer with an LLM judge.
-10. Print a comparison matrix and LangSmith links.
+1. Use the existing LangSmith dataset named `eval`.
+2. Build three eval graphs that differ only in retrieval.
+3. Run each agent against the full dataset.
+4. Take the last agent message as the answer.
+5. Grade that answer with an LLM judge.
 
 The three retrieval variants are:
 

@@ -5,17 +5,19 @@ import { evaluate } from "langsmith/evaluation";
 import type { EvaluationResult } from "langsmith/evaluation";
 import type { Example, Run } from "langsmith/schemas";
 import { z } from "zod";
-import { agent, globalTopKAgent, namespaceTopKAgent } from "../agent.js";
+import { agent, globalTopKAgent, namespaceTopKAgent, TIMEOUT_MS } from "../agent.js";
 import { EVAL_PROMPT } from "./judge-prompt.js";
 
+const DATASET_NAME = "eval";
+
 const judge = new ChatOpenAI({
-  model: "gpt-5.5",
+  model: "gpt-5.4-mini",
+  timeout: TIMEOUT_MS,
+  maxRetries: 0,
   ...(env.OPENAI_PROXY_BASE_URL
-    ? {
-        configuration: { baseURL: env.OPENAI_PROXY_BASE_URL },
-        apiKey: env.OPENAI_API_KEY ?? "not-needed",
-      }
+    ? { configuration: { baseURL: env.OPENAI_PROXY_BASE_URL } }
     : {}),
+  apiKey: env.OPENAI_API_KEY ?? "not-needed",
 });
 
 const JUDGE_SCHEMA = z.object({
@@ -28,9 +30,21 @@ const structuredJudge = judge.withStructuredOutput(JUDGE_SCHEMA, {
   strict: true,
 });
 
-function createJudgeEvaluator(promptTemplate: string) {
+type EvalInput = {
+  input: string;
+};
+
+type EvalOutput = {
+  answer: string;
+};
+
+type EvalAgent = {
+  invoke: typeof agent.invoke;
+};
+
+function createJudgeEvaluator() {
   return async (run: Run, example?: Example): Promise<EvaluationResult[]> => {
-    const prompt = promptTemplate
+    const prompt = EVAL_PROMPT.hallucination
       .replaceAll("{{inputs}}", JSON.stringify(run.inputs ?? {}))
       .replaceAll("{{outputs}}", JSON.stringify(run.outputs ?? {}))
       .replaceAll(
@@ -42,7 +56,7 @@ function createJudgeEvaluator(promptTemplate: string) {
 
     return [
       {
-        key: "score",
+        key: "assignment_score",
         score: parsed.score_0_to_10,
         comment: parsed.reasoning,
       },
@@ -50,62 +64,40 @@ function createJudgeEvaluator(promptTemplate: string) {
   };
 }
 
-type EvalInput = {
-  input: string;
-};
+function createAgentRunner(evalAgent: EvalAgent) {
+  return async (exampleInput: EvalInput): Promise<EvalOutput> => {
+    const result = await evalAgent.invoke(
+      { messages: [{ role: "user", content: exampleInput.input }] },
+      { configurable: { thread_id: randomUUID() } },
+    );
 
-type EvalOutput = {
-  answer: string;
-};
-
-const runGraph = async (
-  graph: typeof agent,
-  exampleInput: EvalInput,
-): Promise<EvalOutput> => {
-  const result = await graph.invoke(
-    { messages: [{ role: "user", content: exampleInput.input }] },
-    { configurable: { thread_id: randomUUID() } },
-  );
-
-  return {
-    answer: String(result.messages.at(-1)?.content ?? ""),
+    return {
+      answer: String(result.messages[result.messages.length - 1]?.content ?? ""),
+    };
   };
-};
+}
 
-const runAgent = async (exampleInput: EvalInput): Promise<EvalOutput> => {
-  return runGraph(agent, exampleInput);
-};
+const experiments = [
+  {
+    name: "namespace-top-k-lexical-rrf",
+    runner: createAgentRunner(agent),
+  },
+  {
+    name: "namespace-top-k",
+    runner: createAgentRunner(namespaceTopKAgent),
+  },
+  {
+    name: "global-top-k",
+    runner: createAgentRunner(globalTopKAgent),
+  },
+] as const;
 
-const runNamespaceTopKAgent = async (
-  exampleInput: EvalInput,
-): Promise<EvalOutput> => {
-  return runGraph(namespaceTopKAgent, exampleInput);
-};
+for (const experiment of experiments) {
+  await evaluate(experiment.runner, {
+    data: DATASET_NAME,
+    evaluators: [createJudgeEvaluator()],
+    experimentPrefix: experiment.name,
+  });
 
-const runGlobalTopKAgent = async (
-  exampleInput: EvalInput,
-): Promise<EvalOutput> => {
-  return runGraph(globalTopKAgent, exampleInput);
-};
-
-const evaluator = createJudgeEvaluator(EVAL_PROMPT.hallucination);
-
-await Promise.all([
-  evaluate(runAgent, {
-    data: "eval",
-    evaluators: [evaluator],
-    experimentPrefix: "agent_eval",
-  }),
-  evaluate(runNamespaceTopKAgent, {
-    data: "eval",
-    evaluators: [evaluator],
-    experimentPrefix: "namespace_top_k_eval",
-  }),
-  evaluate(runGlobalTopKAgent, {
-    data: "eval",
-    evaluators: [evaluator],
-    experimentPrefix: "global_top_k_eval",
-  }),
-]);
-
-console.log("Completed: eval (agent + namespace_top_k + global_top_k)");
+  console.log(`Completed ${experiment.name}`);
+}
