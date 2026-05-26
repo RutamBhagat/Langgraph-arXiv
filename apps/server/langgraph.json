@@ -3,7 +3,9 @@
   "dockerfile_lines": [],
   "dependencies": ["."],
   "graphs": {
-    "agent": "./src/agent.ts:agent"
+    "agent": "./src/agent.ts:agent",
+    "namespaceTopKAgent": "./src/agent.ts:namespaceTopKAgent",
+    "globalTopKAgent": "./src/agent.ts:globalTopKAgent"
   },
   "http": {
     "app": "./src/api/app.ts:app"

@@ -11,7 +11,13 @@ import {
 } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 
-import { TOOLS } from "./tools/index.js";
+import {
+  globalTopKQueryArxivPaperDocs,
+  namespaceTopKQueryArxivPaperDocs,
+} from "./tools/ablation/queryArxivPaperDocs.js";
+import { downloadArxivPaper } from "./tools/downloadArxivPaper.js";
+import { TOOLS, calculator } from "./tools/index.js";
+import { resolveArxivPaper } from "./tools/resolveArxivPaper.js";
 import { SYSTEM_PROMPT } from "./prompts.js";
 import { env } from "@skyclad_langgraph/env/server";
 
@@ -90,3 +96,17 @@ export function createAgentGraph(tools: AgentTool[]) {
 }
 
 export const agent = createAgentGraph(TOOLS);
+
+export const namespaceTopKAgent = createAgentGraph([
+  calculator,
+  downloadArxivPaper,
+  resolveArxivPaper,
+  namespaceTopKQueryArxivPaperDocs,
+]);
+
+export const globalTopKAgent = createAgentGraph([
+  calculator,
+  downloadArxivPaper,
+  resolveArxivPaper,
+  globalTopKQueryArxivPaperDocs,
+]);
