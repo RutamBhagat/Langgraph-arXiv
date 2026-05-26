@@ -21,15 +21,15 @@
   },
   "dependencies": {
     "@skyclad_langgraph/env": "workspace:*",
-    "dotenv": "catalog:",
+    "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
     "pg": "^8.17.1",
-    "zod": "catalog:"
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@skyclad_langgraph/config": "workspace:*",
     "@types/pg": "^8.16.0",
     "drizzle-kit": "^0.31.8",
-    "typescript": "catalog:"
+    "typescript": "^5.9.3"
   }
 }
