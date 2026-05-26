@@ -1,16 +1,9 @@
-import { ChatOpenAI } from "@langchain/openai";
 import { ChatGoogle } from "@langchain/google";
-import { SystemMessage } from "@langchain/core/messages";
-import type { StructuredToolInterface } from "@langchain/core/tools";
-import {
-  END,
-  START,
-  MessagesAnnotation,
-  StateGraph,
-  MemorySaver,
-} from "@langchain/langgraph";
-import { ToolNode } from "@langchain/langgraph/prebuilt";
+import { MemorySaver } from "@langchain/langgraph";
+import { ChatOpenAI } from "@langchain/openai";
+import { createAgent } from "langchain";
 
+import { env } from "@skyclad_langgraph/env/server";
 import {
   globalTopKQueryArxivPaperDocs,
   namespaceTopKQueryArxivPaperDocs,
@@ -19,7 +12,6 @@ import { downloadArxivPaper } from "./tools/downloadArxivPaper.js";
 import { TOOLS, calculator } from "./tools/index.js";
 import { resolveArxivPaper } from "./tools/resolveArxivPaper.js";
 import { SYSTEM_PROMPT } from "./prompts.js";
-import { env } from "@skyclad_langgraph/env/server";
 
 const memory = new MemorySaver();
 
@@ -55,58 +47,33 @@ const baseModel = env.OPENAI_PROXY_BASE_URL
 
 export const model = baseModel.withConfig({ metadata });
 
-export type AgentTool = StructuredToolInterface;
+export const agent = createAgent({
+  model,
+  tools: TOOLS,
+  systemPrompt: SYSTEM_PROMPT,
+  checkpointer: memory,
+});
 
-const shouldContinue = (state: typeof MessagesAnnotation.State) => {
-  const lastMessage = state.messages.at(-1);
+export const namespaceTopKAgent = createAgent({
+  model,
+  tools: [
+    calculator,
+    downloadArxivPaper,
+    resolveArxivPaper,
+    namespaceTopKQueryArxivPaperDocs,
+  ],
+  systemPrompt: SYSTEM_PROMPT,
+  checkpointer: memory,
+});
 
-  if (
-    lastMessage &&
-    "tool_calls" in lastMessage &&
-    Array.isArray(lastMessage.tool_calls) &&
-    lastMessage.tool_calls.length > 0
-  ) {
-    return "tools";
-  }
-
-  return END;
-};
-
-export function createAgentGraph(tools: AgentTool[]) {
-  const modelWithTools = baseModel.bindTools(tools).withConfig({ metadata });
-
-  const callModel = async (state: typeof MessagesAnnotation.State) => {
-    const response = await modelWithTools.invoke([
-      new SystemMessage(SYSTEM_PROMPT),
-      ...state.messages,
-    ]);
-
-    return {
-      messages: [response],
-    };
-  };
-
-  return new StateGraph(MessagesAnnotation)
-    .addNode("agent", callModel)
-    .addNode("tools", new ToolNode(tools))
-    .addEdge(START, "agent")
-    .addConditionalEdges("agent", shouldContinue)
-    .addEdge("tools", "agent")
-    .compile({ checkpointer: memory });
-}
-
-export const agent = createAgentGraph(TOOLS);
-
-export const namespaceTopKAgent = createAgentGraph([
-  calculator,
-  downloadArxivPaper,
-  resolveArxivPaper,
-  namespaceTopKQueryArxivPaperDocs,
-]);
-
-export const globalTopKAgent = createAgentGraph([
-  calculator,
-  downloadArxivPaper,
-  resolveArxivPaper,
-  globalTopKQueryArxivPaperDocs,
-]);
+export const globalTopKAgent = createAgent({
+  model,
+  tools: [
+    calculator,
+    downloadArxivPaper,
+    resolveArxivPaper,
+    globalTopKQueryArxivPaperDocs,
+  ],
+  systemPrompt: SYSTEM_PROMPT,
+  checkpointer: memory,
+});
