@@ -4,6 +4,8 @@ This is a LangGraph-based agentic RAG system for asking questions about indexed 
 
 Let me explain what was built, why the major choices were made, and where the project boundaries are. The detailed local runbook lives in [apps/docs/00-setup.md](apps/docs/00-setup.md).
 
+Demo: https://youtu.be/s-dMQE1xVps?si=ZdRsI-qBaynTzUGb
+
 For setup, start there:
 
 ```bash
