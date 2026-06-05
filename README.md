@@ -160,14 +160,6 @@ The architecture is intentionally close to Context7's retrieval shape, with modi
 
 Context7's two-step pattern works well for this problem: resolve the right source first, then retrieve within that source instead of searching every chunk globally.
 
-## What I Would Do With Another Week
-
-First, I would expand the retrieval ablations:
-
-- try an answer-only variant that removes previous tool calls and tool observations from the response context before the model writes the final answer
-
-- add reranking to the ablation to see if it actually makes the agent better at retrieving relevant information.
-
 ## Project Docs
 
 - [Setup](apps/docs/00-setup.md)
